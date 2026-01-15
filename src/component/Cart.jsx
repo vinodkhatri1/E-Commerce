@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import CartCard from "./CartCard";
 import EmptyBaskat from "../assets/EmptyCart.png";
 import { useCart } from "../context/CartContext";
-import { useEffect } from "react";
+// Removed unused useEffect import
 
 const Cart = ({ setIsOpenCart }) => {
   const { cart } = useCart();
@@ -11,36 +11,59 @@ const Cart = ({ setIsOpenCart }) => {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="fixed top-0 right-0 z-10 w-96 h-screen bg-white overflow-auto">
-      <div className="h-18 flex justify-between items-center mx-4">
-        <h1 className="text-2xl font-medium">Your Cart</h1>
-        <button onClick={() => setIsOpenCart(false)}>
-          <X size={32} />
-        </button>
-      </div>
+    <>
+      {/* Overlay to dim background (optional but recommended) */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-10" 
+        onClick={() => setIsOpenCart(false)} 
+      />
 
-      {emptyCart ? (
-        <div className="flex flex-col justify-center items-center p-4">
-          <img className="h-48" src={EmptyBaskat} alt="EmptyCart" />
-          <h1>Your cart is empty</h1>
-        </div>
-      ) : (
-        <div className="mx-4">
-          {cart.map((item) => (
-            <CartCard key={item.id} item={item} />
-          ))}
-
-          <div className="flex justify-between mx-4 mb-4 text-2xl font-bold">
-            <h1>Total</h1>
-            <h1>${total.toFixed(2)}</h1>
-          </div>
-
-          <button className="bg-blue-500 h-12 w-full my-5 text-white font-bold">
-            CHECKOUT
+      {/* Main Cart Drawer */}
+      <div className="fixed top-0 right-0 z-20 w-full sm:w-96 h-screen bg-white shadow-2xl flex flex-col">
+        
+        {/* Header */}
+        <div className="h-16 flex justify-between items-center px-6 border-b">
+          <h1 className="text-xl font-bold">Your Cart ({cart.length})</h1>
+          <button 
+            onClick={() => setIsOpenCart(false)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X size={24} />
           </button>
         </div>
-      )}
-    </div>
+
+        {/* Content Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          {emptyCart ? (
+            <div className="flex flex-col justify-center items-center h-full p-6 text-center">
+              <img className="w-48 mb-4 opacity-80" src={EmptyBaskat} alt="EmptyCart" />
+              <h2 className="text-xl font-semibold text-gray-700">Your cart is empty</h2>
+              <p className="text-gray-500 mt-2">Looks like you haven't added anything yet.</p>
+            </div>
+          ) : (
+            <div className="p-4 space-y-4">
+              {cart.map((item) => (
+                <CartCard key={item.id} item={item} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer Section (Total + Checkout) - Fixed at bottom */}
+        {!emptyCart && (
+          <div className="border-t p-4 bg-gray-50">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-medium text-gray-600">Total</span>
+              <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
+            </div>
+
+            <button className="w-full bg-blue-600 h-12 rounded-lg text-white font-bold hover:bg-blue-700 transition-colors active:scale-95">
+              CHECKOUT
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

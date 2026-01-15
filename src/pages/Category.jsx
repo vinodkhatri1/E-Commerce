@@ -5,22 +5,28 @@ import ProductData from "../Data/ProductData";
 const Category = () => {
   const { category } = useParams();
 
-  // Filter products of this category
-  const products = ProductData.filter((p) => p.category === category);
+  // Filter products of this category (Case insensitive safety)
+  const products = ProductData.filter(
+    (p) => p.category.toLowerCase() === category?.toLowerCase()
+  );
 
   return (
-    <div className="min-h-screen">
-      <h1 className="text-xl font-semibold mb-4 m-4">
-        {category.toUpperCase()}
+    <div className="min-h-screen container mx-auto px-4 py-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800 uppercase border-b pb-2">
+        {category}
       </h1>
 
-      <div className="flex flex-wrap m-5">
-        {products.length > 0 ? (
-          products.map((item) => <ProductCard key={item.id} productdt={item} />)
-        ) : (
-          <p className="text-gray-500">No products found in this category.</p>
-        )}
-      </div>
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((item) => (
+            <ProductCard key={item.id} productdt={item} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <p className="text-gray-500 text-lg">No products found in this category.</p>
+        </div>
+      )}
     </div>
   );
 };
