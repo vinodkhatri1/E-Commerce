@@ -12,29 +12,22 @@ const Products = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header & Filter */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">
-            All Products
-        </h1>
+    <div>
+      <div className="flex justify-between mx-8 my-4">
+        <h1 className="font-semibold mt-0.5">PRODUCTS</h1>
 
-        <div className="flex items-center gap-3">
-            <span className="text-gray-600 text-sm font-medium">Sort By:</span>
-            <select
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            >
-            <option value="default">Default</option>
-            <option value="asc">Price (Low to High)</option>
-            <option value="desc">Price (High to Low)</option>
-            </select>
-        </div>
+        <select
+          className="border-2 rounded-sm w-45 h-8 font-medium p-0.5 text-sm"
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+        >
+          <option value="default">Default</option>
+          <option value="asc">Price (low to high)</option>
+          <option value="desc">Price (high to low)</option>
+        </select>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="flex flex-wrap m-5">
         {sortedProducts.map((item) => (
           <ProductCard key={item.id} productdt={item} />
         ))}

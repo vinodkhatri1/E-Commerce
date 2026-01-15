@@ -2,7 +2,7 @@ import { Star, StarHalf } from "lucide-react";
 
 const Stars = ({ rating, size = 16 }) => {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((star) => {
         if (rating >= star) {
           return (
@@ -25,7 +25,7 @@ const Stars = ({ rating, size = 16 }) => {
             <Star
               key={star}
               size={size}
-              className="text-gray-200 fill-gray-100" // Made empty stars lighter
+              className="text-gray-300"
             />
           );
         }
@@ -33,4 +33,4 @@ const Stars = ({ rating, size = 16 }) => {
     </div>
   );
 };
-export default Stars;
+export default Stars
