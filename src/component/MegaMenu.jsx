@@ -22,7 +22,7 @@ const MegaMenu = () => {
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
         >
-          <span className="cursor-pointer hover:text-blue-600 transition py-6 inline-block h-full items-center gap-1">
+          <span className="cursor-pointer hover:text-blue-600 transition py-6 inline-block h-full flex items-center gap-1">
             Categories <span className="text-xs">▼</span>
           </span>
 
@@ -57,7 +57,7 @@ const MegaMenu = () => {
                             to={`/products/${product.id}`}
                             className="flex items-start gap-3 group p-2 rounded-lg hover:bg-gray-50 transition-colors"
                           >
-                            <div className="h-12 w-12 shrink-0 bg-white border border-gray-100 rounded-md p-1 flex items-center justify-center">
+                            <div className="h-12 w-12 flex-shrink-0 bg-white border border-gray-100 rounded-md p-1 flex items-center justify-center">
                                 <img
                                 src={`/image/${product.category}/${product.image}`}
                                 alt={product.title}
