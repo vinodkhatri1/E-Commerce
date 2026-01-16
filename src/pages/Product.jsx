@@ -10,10 +10,15 @@ import { useCart } from "../context/CartContext";
 
 const Product = () => {
   const { id } = useParams();
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
 
   const product = ProductData.find((p) => p.id === Number(id));
   const [image, setImage] = useState("");
+
+  const handleBuyNow = () => {
+    addToCart(product); // 1. Add item
+    openCart(); // 2. Open the sidebar
+  };
 
   useEffect(() => {
     if (product) {
@@ -24,12 +29,16 @@ const Product = () => {
     }
   }, [id, product]);
 
-  if (!product) 
-    return <div className="p-10 text-center text-xl text-red-500">Product not found</div>;
+  if (!product)
+    return (
+      <div className="p-10 text-center text-xl text-red-500">
+        Product not found
+      </div>
+    );
 
   // Assuming product has multiple images, or reusing same for demo
   const pic = [`/image/${product.category}/${product.image}`];
-  
+
   const similarProducts = ProductData.filter(
     (p) => p.category === product.category && p.id !== product.id
   );
@@ -38,15 +47,14 @@ const Product = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Main Product Section */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 border-b border-gray-200 pb-12">
-        
         {/* Left: Images */}
         <div className="w-full lg:w-1/2 flex flex-col items-center">
           <div className="w-full max-w-lg aspect-square bg-white border rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4">
-             <img 
-                className="w-full h-full object-contain" 
-                src={image} 
-                alt={product.title} 
-             />
+            <img
+              className="w-full h-full object-contain"
+              src={image}
+              alt={product.title}
+            />
           </div>
           <ProductImege pic={pic} setImage={setImage} />
         </div>
@@ -59,7 +67,9 @@ const Product = () => {
 
           <div className="flex items-center gap-3 mb-4">
             <Stars rating={product.rating} />
-            <span className="text-sm text-gray-500">({product.rating} Rating)</span>
+            <span className="text-sm text-gray-500">
+              ({product.rating} Rating)
+            </span>
           </div>
 
           <div className="mb-6">
@@ -67,7 +77,9 @@ const Product = () => {
             {product.originalPrice && (
               <p className="flex gap-2 text-sm text-gray-500 mt-1">
                 <span className="line-through">${product.originalPrice}</span>
-                <span className="font-bold text-green-600">-{product.discountPercent}% Off</span>
+                <span className="font-bold text-green-600">
+                  -{product.discountPercent}% Off
+                </span>
               </p>
             )}
           </div>
@@ -84,17 +96,21 @@ const Product = () => {
             </div>
             <div className="flex">
               <span className="font-bold w-24">Stock:</span>
-              <span className={product.stock > 0 ? "text-green-600" : "text-red-600"}>
+              <span
+                className={
+                  product.stock > 0 ? "text-green-600" : "text-red-600"
+                }
+              >
                 {product.stock > 0 ? "In Stock" : "Out of Stock"}
               </span>
             </div>
           </div>
 
           <div className="mb-8">
-             <h4 className="font-bold text-gray-900 mb-2">About the product</h4>
-             <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                {product.description}
-             </p>
+            <h4 className="font-bold text-gray-900 mb-2">About the product</h4>
+            <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+              {product.description}
+            </p>
           </div>
 
           {/* Action Buttons */}
@@ -109,7 +125,7 @@ const Product = () => {
 
             <button
               className="flex-1 h-12 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 font-bold"
-              onClick={() => addToCart(product)}
+              onClick={handleBuyNow}
             >
               <CreditCard size={20} />
               Buy Now
@@ -120,19 +136,16 @@ const Product = () => {
 
       {/* Reviews & Similar Products */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-         {/* Reviews taking up 2/3 on desktop, full on mobile */}
+        {/* Reviews taking up 2/3 on desktop, full on mobile */}
         <div className="lg:col-span-4">
-            <ReviewComments />
+          <ReviewComments />
         </div>
-
-     
-      
       </div>
 
       {/* Similar Products Section */}
       <div className="mt-16">
         <h1 className="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4">
-            Similar Products
+          Similar Products
         </h1>
         {similarProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
