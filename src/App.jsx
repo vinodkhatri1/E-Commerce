@@ -8,6 +8,7 @@ import Products from "./pages/Products";
 import Product from "./pages/Product";
 import { useEffect } from "react";
 import SellProduct from "./pages/Sell";
+import SearchResults from "./pages/SearchResults";
 const App = () => {
   const ScrollToTop = () => {
     const { pathname } = useLocation();
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<Product />} />
         <Route path="/sell" element={<SellProduct />} />
+        <Route path="/search" element={<SearchResults />} />
       </Routes>
       <Footer />
     </div>
