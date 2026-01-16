@@ -5,6 +5,8 @@ import ProductData from "../Data/ProductData";
 const MegaMenu = () => {
   const [open, setOpen] = useState(false);
 
+  if (!ProductData) return null;
+
   const categories = [...new Set(ProductData.map((p) => p.category))];
 
   const menuItems = categories.map((cat) => ({
@@ -13,77 +15,78 @@ const MegaMenu = () => {
   }));
 
   return (
-    <nav className="relative">
+    <nav>
       <ul className="flex gap-6 font-medium">
-        {/* Categories */}
         <li
-          className="relative"
+          className=""
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
         >
-          <span className="cursor-pointer hover:text-blue-600 transition">
-            Categories
+          <span className="cursor-pointer hover:text-blue-600 transition py-6 inline-block h-full items-center gap-1">
+            Categories <span className="text-xs">▼</span>
           </span>
 
           {open && (
-            <div
-              className="
-                absolute top-4 right-0 mt-3
-                bg-white shadow-2xl border
-                rounded-xl p-6 z-50
-                w-[95vw] max-w-6xl
-              "
-            >
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {menuItems.slice(0, 4).map((menu) => (
-                  <div key={menu.title}>
-                    {/* Category header */}
-                    <div className="flex justify-between items-center mb-3">
+            <div className="fixed top-20 inset-x-0 z-40 flex justify-center px-4">
+              {/* Invisible hover bridge */}
+              <div className="absolute -top-6 h-6 w-full bg-transparent" />
+
+              {/* The Actual Menu Card */}
+              <div 
+                className="
+                  bg-white shadow-2xl border-t border-gray-100 
+                  rounded-b-xl p-6 w-full max-w-7xl 
+                  max-h-[calc(100vh-100px)] overflow-y-auto
+                  animate-in fade-in slide-in-from-top-2 duration-200
+                "
+              >
+                <div className="grid grid-cols-4 gap-8">
+                  {menuItems.slice(0, 4).map((menu) => (
+                    <div key={menu.title} className="flex flex-col">
                       <Link
                         to={`/category/${menu.title}`}
-                        className="capitalize font-semibold text-sm text-black hover:text-blue-600 underline"
+                        className="mb-4 text-lg font-bold capitalize text-gray-900 hover:text-blue-600 border-b pb-2 flex justify-between items-center"
                       >
                         {menu.title}
                       </Link>
+
+                      <div className="space-y-4 flex-1">
+                        {menu.products.map((product) => (
+                          <Link
+                            key={product.id}
+                            to={`/products/${product.id}`}
+                            className="flex items-start gap-3 group p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="h-12 w-12 shrink-0 bg-white border border-gray-100 rounded-md p-1 flex items-center justify-center">
+                                <img
+                                src={`/image/${product.category}/${product.image}`}
+                                alt={product.title}
+                                className="h-full w-full object-contain group-hover:scale-110 transition-transform"
+                                />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm text-gray-700 font-medium truncate w-full group-hover:text-blue-600">
+                                {product.title}
+                              </p>
+                              <p className="text-blue-600 text-xs font-bold mt-0.5">
+                                ${product.price.toFixed(2)}
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
+                  ))}
+                </div>
 
-                    {/* Products */}
-                    <div className="space-y-3">
-                      {menu.products.map((product) => (
-                        <Link
-                          key={product.id}
-                          to={`/products/${product.id}`}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 transition"
-                        >
-                          <img
-                            src={`/image/${product.category}/${product.image}`}
-                            alt={product.title}
-                            className="h-12 w-12 object-contain"
-                          />
-
-                          <div>
-                            <p className="text-sm font-medium truncate max-w-[160px]">
-                              {product.title}
-                            </p>
-                            <p className="text-blue-600 font-semibold text-sm">
-                              ${product.price.toFixed(2)}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Footer */}
-              <div className="mt-6 text-center">
-                <Link
-                  to="/products"
-                  className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Browse All Products
-                </Link>
+                <div className="mt-8 pt-4 border-t border-gray-100 text-center">
+                  <Link
+                    to="/products"
+                    className="inline-flex items-center justify-center bg-gray-900 text-white px-8 py-2.5 rounded-full hover:bg-blue-600 transition-colors font-medium text-sm shadow-lg hover:shadow-xl transform active:scale-95"
+                  >
+                    Browse All Categories
+                  </Link>
+                </div>
               </div>
             </div>
           )}
