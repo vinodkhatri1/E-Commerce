@@ -64,6 +64,13 @@ const Header = () => {
               </span>
             )}
           </li>
+          <Link 
+  to="/sell" 
+  className="hidden md:flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-full font-bold ml-4 hover:scale-105 transition-transform"
+>
+ 
+  <span>Sell</span>
+</Link>
 
           {/* Dark Mode (Hidden on Mobile, moved to drawer) */}
           <li className="cursor-pointer hover:text-blue-600 transition hidden sm:block">
