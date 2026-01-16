@@ -33,7 +33,7 @@ const MegaMenu = () => {
           onMouseLeave={() => setOpen(false)}
         >
           <span className="cursor-pointer py-6 inline-flex items-center gap-1 hover:text-blue-600 transition">
-            <Link to={"/categories"}>
+            <Link to={"/categories"} onClick={() => setOpen(false)}>
               Categories <span className="text-xs">▼</span>
             </Link>
           </span>
