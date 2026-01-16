@@ -14,6 +14,8 @@ import {
   TextQuote,
   Sparkles,
 } from "lucide-react";
+import ProductData from "../Data/ProductData";
+const categories = [...new Set(ProductData.map((item) => item.category))];
 
 const SellProduct = () => {
   const { addProduct } = useProducts();
@@ -197,9 +199,9 @@ const SellProduct = () => {
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer"
                     onChange={handleInputChange}
                   >
-                    <option>Electronics</option>
-                    <option>Fashion</option>
-                    <option>Home & Garden</option>
+                    {categories.map((title, index) => (
+                      <option>{title.toUpperCase()}</option>
+                    ))}
                   </select>
                 </div>
               </div>
