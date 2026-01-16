@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from "react";
 import logo from "../assets/logo.png";
 import {
   User,
@@ -9,8 +10,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import MegaMenu from "./MegaMenu";
 import Cart from "./Cart";
 import LogIn from "./LogIn";
@@ -18,15 +18,63 @@ import { useCart } from "../context/CartContext";
 import ProductData from "../Data/ProductData";
 
 const Header = () => {
+  // --- States ---
   const [isOpenLogIn, setIsOpenLogIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState(false);
 
+  // Search & Recommendation States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const navigate = useNavigate();
+  const searchRef = useRef(null);
   const { cart, isCartOpen, openCart, closeCart } = useCart();
   const isEmpty = cart.length === 0;
 
   // Extract categories for Mobile Menu
   const categories = [...new Set(ProductData?.map((p) => p.category) || [])];
+
+  // --- Search Logic ---
+
+  // Handle live recommendations as user types
+  useEffect(() => {
+    if (searchTerm.trim().length > 1) {
+      const filtered = ProductData.filter(
+        (product) =>
+          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.brand.toLowerCase().includes(searchTerm.toLowerCase())
+      ).slice(0, 6); // Limit to top 6 suggestions
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchTerm]);
+
+  // Close recommendations when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSearchSubmit = (e, selectedTerm) => {
+    if (e) e.preventDefault();
+    const termToSearch = selectedTerm || searchTerm;
+    if (termToSearch.trim()) {
+      navigate(`/search?q=${termToSearch}`);
+      setShowSuggestions(false);
+      setIsMobileMenuOpen(false); // Close mobile menu if searching from there
+    }
+  };
 
   return (
     <div className="shadow-md sticky top-0 z-30 bg-white">
@@ -36,21 +84,82 @@ const Header = () => {
           <img className="h-10 sm:h-14 w-auto" src={logo} alt="Home" />
         </Link>
 
-        {/* Center: Search Bar (Desktop/Tablet Only) */}
-        <div className="flex items-center border-2 border-blue-500 rounded-lg overflow-hidden flex-1 w-full md:max-w-md mx-2 md:mx-6">
-          <input
-            className="bg-white h-10 w-full px-3 outline-none text-sm md:text-base"
-            type="text"
-            placeholder="Search products..."
-          />
-          <button className="bg-blue-500 h-10 w-10 md:w-12 flex items-center justify-center text-white hover:bg-blue-600 transition shrink-0">
-            <Search size={20} />
-          </button>
+        {/* Center: Search Bar with Recommendations */}
+        <div className="relative flex-1 max-w-md mx-2 md:mx-6" ref={searchRef}>
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex items-center border-2 border-blue-500 rounded-lg overflow-hidden"
+          >
+            <input
+              className="bg-white h-10 w-full px-3 outline-none text-sm md:text-base"
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => searchTerm.length > 1 && setShowSuggestions(true)}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="p-1 text-gray-400 hover:text-gray-600"
+              >
+                <X size={16} />
+              </button>
+            )}
+            <button
+              type="submit"
+              className="bg-blue-500 h-10 w-10 md:w-12 flex items-center justify-center text-white hover:bg-blue-600 transition shrink-0"
+            >
+              <Search size={20} />
+            </button>
+          </form>
+
+          {/* Recommendation Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 w-full bg-white shadow-2xl rounded-b-lg border border-gray-200 z-50 overflow-hidden mt-1">
+              <div className="p-2 text-[10px] font-bold text-gray-400 uppercase bg-gray-50 tracking-wider">
+                Recommended Products
+              </div>
+              {suggestions.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer transition border-b border-gray-50 last:border-none"
+                  onClick={() => {
+                    setSearchTerm(product.title);
+                    handleSearchSubmit(null, product.title);
+                  }}
+                >
+                  <img
+                    src={product.image}
+                    alt=""
+                    className="w-8 h-8 object-contain bg-gray-100 rounded"
+                    onError={(e) =>
+                      (e.target.src = "https://via.placeholder.com/40")
+                    }
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-800 line-clamp-1">
+                      {product.title}
+                    </span>
+                    <span className="text-[10px] text-blue-500 font-semibold uppercase">
+                      {product.category}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              <div
+                className="p-2 text-center text-sm text-blue-600 font-bold hover:bg-blue-50 cursor-pointer border-t"
+                onClick={() => handleSearchSubmit()}
+              >
+                View all results for "{searchTerm}"
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Icons & Desktop Menu */}
         <ul className="flex items-center gap-4 sm:gap-6 text-xl font-medium text-gray-700">
-          {/* Desktop MegaMenu (Hidden on Mobile) */}
           <div className="hidden lg:block">
             <MegaMenu />
           </div>
@@ -76,19 +185,19 @@ const Header = () => {
               </span>
             )}
           </li>
+
           <Link
             to="/sell"
-            className="hidden md:flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-full font-bold ml-4 hover:scale-105 transition-transform"
+            className="hidden md:flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-full font-bold ml-4 hover:scale-105 transition-transform"
           >
             <span>Sell</span>
           </Link>
 
-          {/* Dark Mode (Hidden on Mobile, moved to drawer) */}
           <li className="cursor-pointer hover:text-blue-600 transition hidden sm:block">
             <Moon size={24} />
           </li>
 
-          {/* Hamburger Icon (Visible on Mobile/Tablet) */}
+          {/* Hamburger Icon */}
           <li
             className="cursor-pointer lg:hidden z-40"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -97,14 +206,10 @@ const Header = () => {
           </li>
         </ul>
 
-        {/* ============================== */}
-        {/* MOBILE MENU DRAWER             */}
-        {/* ============================== */}
+        {/* Mobile Menu Drawer */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-30 bg-white pt-20 px-4 overflow-y-auto lg:hidden animate-in slide-in-from-right duration-200">
-            {/* Mobile Navigation Links */}
+          <div className="fixed inset-0 z-30 bg-white pt-20 px-4 overflow-y-auto lg:hidden">
             <ul className="space-y-4 font-medium text-lg">
-              {/* Expandable Categories */}
               <li>
                 <button
                   onClick={() => setIsMobileCategoryOpen(!isMobileCategoryOpen)}
@@ -114,7 +219,6 @@ const Header = () => {
                   {isMobileCategoryOpen ? <ChevronDown /> : <ChevronRight />}
                 </button>
 
-                {/* Dropdown list */}
                 {isMobileCategoryOpen && (
                   <div className="pl-4 mt-2 space-y-3 border-l-2 border-blue-100 ml-2">
                     {categories.map((cat) => (
@@ -139,10 +243,7 @@ const Header = () => {
               </li>
 
               <li className="border-b border-gray-100 py-2">
-                <button
-                  className="flex items-center gap-3 w-full"
-                  onClick={() => console.log("Toggle Dark Mode")}
-                >
+                <button className="flex items-center gap-3 w-full">
                   <Moon size={20} />
                   <span>Dark Mode</span>
                 </button>
@@ -163,10 +264,10 @@ const Header = () => {
           </div>
         )}
 
-        {/* UPDATED: Use isCartOpen from context */}
-        {/* Pass closeCart as the setter to your Cart component */}
+        {/* Cart Overlay */}
         {isCartOpen && <Cart setIsOpenCart={closeCart} />}
 
+        {/* Login Modal */}
         {isOpenLogIn && (
           <>
             <div
