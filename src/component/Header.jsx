@@ -6,7 +6,7 @@ import MegaMenu from "./MegaMenu";
 import Cart from "./Cart";
 import LogIn from "./LogIn";
 import { useCart } from "../context/CartContext";
-import ProductData from "../Data/ProductData"; // Import data for mobile menu
+import ProductData from "../Data/ProductData"; 
 
 const Header = () => {
   const [isOpenCart, setIsOpenCart] = useState(false);
@@ -25,7 +25,7 @@ const Header = () => {
       <div className="container mx-auto h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6">
         
         {/* Left: Logo */}
-        <Link to="/" className="flex-shrink-0 z-40">
+        <Link to="/" className="shrink-0 z-40">
           <img className="h-10 sm:h-14 w-auto" src={logo} alt="Home" />
         </Link>
 

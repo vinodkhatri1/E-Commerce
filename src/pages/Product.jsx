@@ -121,14 +121,12 @@ const Product = () => {
       {/* Reviews & Similar Products */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
          {/* Reviews taking up 2/3 on desktop, full on mobile */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-4">
             <ReviewComments />
         </div>
 
-        {/* Similar Products (or sidebar content) */}
-        <div className="lg:col-span-1">
-             {/* You could put additional info here */}
-        </div>
+     
+      
       </div>
 
       {/* Similar Products Section */}
