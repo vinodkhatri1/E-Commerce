@@ -4,8 +4,7 @@ import Laptop from "../assets/Laptop.png";
 const Nav = () => {
   return (
     <div className="bg-[#e3edf6] w-full">
-      <div className="container mx-auto px-4 py-8 sm:py-12 flex flex-col-reverse md:flex-row items-center justify-between gap-8">
-        
+      <div className="container sm:mx-auto lg:mx-8 px-4 py-8 sm:py-12 flex flex-col-reverse md:flex-row items-center justify-between gap-8">
         {/* Text Content */}
         <div className="flex flex-col gap-4 text-center md:text-left items-center md:items-start max-w-xl">
           <h3 className="font-medium text-red-600 text-lg uppercase tracking-wide">
@@ -28,7 +27,11 @@ const Nav = () => {
 
         {/* Image */}
         <div className="w-full max-w-md md:max-w-lg">
-          <img className="w-full h-auto object-contain drop-shadow-xl" src={Laptop} alt="Laptop Banner" />
+          <img
+            className="w-full h-auto object-contain drop-shadow-xl"
+            src={Laptop}
+            alt="Laptop Banner"
+          />
         </div>
       </div>
     </div>
