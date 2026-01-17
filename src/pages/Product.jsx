@@ -7,6 +7,7 @@ import { ShoppingCart, CreditCard } from "lucide-react";
 import ProductImege from "../component/ProductImege";
 import ProductData from "../Data/ProductData";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Product = () => {
   const { id } = useParams();
@@ -14,12 +15,19 @@ const Product = () => {
 
   const product = ProductData.find((p) => p.id === Number(id));
   const [image, setImage] = useState("");
+const { isLoggedIn, openLogin } = useAuth();
 
-  const handleBuyNow = () => {
-    addToCart(product); // 1. Add item
-    openCart(); // 2. Open the sidebar
+const handleBuyNow = () => {
+    // 3. THE CHECK: Is user logged in?
+    if (!isLoggedIn) {
+      openLogin(); // If no, open the modal immediately
+      return;      // Stop here. Do not add to cart.
+    }
+
+    // If yes, proceed normally
+    addToCart(product);
+    openCart();
   };
-
   useEffect(() => {
     if (product) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -123,13 +131,13 @@ const Product = () => {
               Add to Cart
             </button>
 
-            <button
-              className="flex-1 h-12 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 font-bold"
-              onClick={handleBuyNow}
-            >
-              <CreditCard size={20} />
-              Buy Now
-            </button>
+           <button
+        onClick={handleBuyNow} // Use the new handler
+        className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 ..."
+     >
+        <Zap size={22} fill="currentColor" />
+        Buy Now
+     </button>
           </div>
         </div>
       </div>
