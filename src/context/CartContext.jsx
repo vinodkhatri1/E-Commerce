@@ -44,6 +44,10 @@ export const CartProvider = ({ children }) => {
         .filter((item) => item.quantity > 0)
     );
   };
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem(CART_KEY);
+  };
 
   // 3. NEW: Helper functions to control the sidebar
   const openCart = () => setIsCartOpen(true);
@@ -60,6 +64,7 @@ export const CartProvider = ({ children }) => {
         isCartOpen,
         openCart,
         closeCart,
+        clearCart,
       }}
     >
       {children}
