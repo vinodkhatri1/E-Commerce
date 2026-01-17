@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import ProductCard from "../component/ProductCard";
 import ReviewComments from "../component/ReviewComments";
 import Stars from "../component/Stars";
-import { ShoppingCart, CreditCard ,Zap} from "lucide-react";
+import { ShoppingCart, CreditCard } from "lucide-react";
 import ProductImege from "../component/ProductImege";
 import ProductData from "../Data/ProductData";
 import { useCart } from "../context/CartContext";
@@ -131,13 +131,13 @@ const handleBuyNow = () => {
               Add to Cart
             </button>
 
-           <button
-        onClick={handleBuyNow} // Use the new handler
-        className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 ..."
-     >
-        <Zap size={22} fill="currentColor" />
-        Buy Now
-     </button>
+          <button
+  onClick={handleBuyNow}
+  className="flex-1 h-14 bg-gray-900 hover:bg-black text-white rounded-xl font-bold text-lg shadow-xl shadow-gray-200 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+>
+  <CreditCard size={22} />
+  Buy Now
+</button>
           </div>
         </div>
       </div>
