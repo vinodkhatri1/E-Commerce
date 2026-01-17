@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import initialData from "../Data/ProductData"; // Your existing static file
+import initialData from "../Data/ProductData"; 
 
 const ProductContext = createContext();
 
@@ -18,8 +18,14 @@ export const ProductProvider = ({ children }) => {
     setProducts((prev) => [itemWithId, ...prev]); // Add to top of list
   };
 
+  // Function to get all unique categories
+  const getCategories = () => {
+    const categories = [...new Set(products.map((product) => product.category))];
+    return categories;
+  };
+
   return (
-    <ProductContext.Provider value={{ products, addProduct }}>
+    <ProductContext.Provider value={{ products, addProduct, getCategories }}>
       {children}
     </ProductContext.Provider>
   );
