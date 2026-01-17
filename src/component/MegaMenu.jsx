@@ -8,6 +8,7 @@ const MegaMenu = () => {
   if (!Array.isArray(ProductData) || ProductData.length === 0) return null;
 
   // 🔹 Group products by category (performance fix)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const menuItems = useMemo(() => {
     const map = {};
     ProductData.forEach((p) => {

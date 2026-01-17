@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import ProductCard from "../component/ProductCard";
 import ReviewComments from "../component/ReviewComments";
 import Stars from "../component/Stars";
-import { ShoppingCart, CreditCard } from "lucide-react";
+import { ShoppingCart, CreditCard ,Zap} from "lucide-react";
 import ProductImege from "../component/ProductImege";
 import ProductData from "../Data/ProductData";
 import { useCart } from "../context/CartContext";
