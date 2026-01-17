@@ -106,6 +106,7 @@ const SellerDashboard = () => {
     };
 
     // Add to Context
+    // eslint-disable-next-line no-unused-vars
     const addedProduct = addProduct(newProduct);
 
     setSuccessMessage("Product listed successfully!");
