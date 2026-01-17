@@ -11,6 +11,7 @@ import SellProduct from "./pages/Sell";
 import SellerDashboard from "./pages/Sell";
 import SearchResults from "./pages/SearchResults";
 import Checkout from "./pages/Checkout";
+import { AuthProvider } from "./context/AuthContext";
 const App = () => {
   const ScrollToTop = () => {
     const { pathname } = useLocation();
@@ -20,7 +21,9 @@ const App = () => {
     return null;
   };
   return (
+    
     <div className="font-poppins">
+      <AuthProvider>
       <Header />
       <ScrollToTop />
       <Routes>
@@ -35,6 +38,7 @@ const App = () => {
         <Route path="/checkout" element={<Checkout />} />
       </Routes>
       <Footer />
+      </AuthProvider>
     </div>
   );
 };
