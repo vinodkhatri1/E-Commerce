@@ -28,6 +28,7 @@ const Header = () => {
 
   // --- Local States ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -38,7 +39,6 @@ const Header = () => {
   const inputRef = useRef(null);
   const isEmpty = cart.length === 0;
 
-  const categories = [...new Set(ProductData?.map((p) => p.category) || [])];
 
   // --- Search Logic ---
   useEffect(() => {
@@ -49,6 +49,7 @@ const Header = () => {
           product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.brand?.toLowerCase().includes(searchTerm.toLowerCase()),
       ).slice(0, 6);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
