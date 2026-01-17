@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import SellProduct from "./pages/Sell";
 import SearchResults from "./pages/SearchResults";
 import SellerDashboard from "./pages/Sell";
+import Checkout from "./pages/Checkout";
 const App = () => {
   const ScrollToTop = () => {
     const { pathname } = useLocation();
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/sell" element={<SellProduct />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/seller-dashboard" element={<SellerDashboard />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Routes>
       <Footer />
     </div>
