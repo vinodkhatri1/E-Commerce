@@ -1,7 +1,21 @@
 import React from "react";
 import { LockKeyholeOpen, CircleUserRound, KeyRound } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 
-const LogIn = () => {
+// 2. Accept 'onClose' as a prop from the parent component
+const LogIn = ({ onClose }) => {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // A. Close the popup first (if the function exists)
+    if (onClose) {
+      onClose();
+    }
+    
+    // B. Then navigate to Home
+    navigate("/");
+  };
+
   return (
     <div className="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
       <div className="p-8">
@@ -31,7 +45,12 @@ const LogIn = () => {
               placeholder="Password"
             />
           </div>
-          <button className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition active:scale-95">
+
+          {/* 3. Changed from Link to Button with onClick handler */}
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition active:scale-95 flex items-center justify-center"
+          >
             Log In
           </button>
         </div>
