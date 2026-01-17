@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGlobalState } from "../context/GlobalStateContext";
+import { useProducts } from "../context/productContext";
 import { useNavigate, Link } from "react-router-dom";
 import { 
   Upload, 
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const SellerDashboard = () => {
-  const { addProduct, getCategories } = useGlobalState();
+  const { addProduct, getCategories } = useProducts();
   const navigate = useNavigate();
 
   // --- 1. EXACT STATE FROM YOUR CODE ---
@@ -135,7 +135,7 @@ const SellerDashboard = () => {
       } else {
           navigate('/');
       }
-    }, 1500);
+    }, 2500);
 
     // Reset form
     setFormData({

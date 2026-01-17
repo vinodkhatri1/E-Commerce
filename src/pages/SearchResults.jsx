@@ -20,6 +20,7 @@ const SearchResults = () => {
         );
       });
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredProducts(results);
     } else {
       setFilteredProducts([]);

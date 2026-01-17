@@ -8,10 +8,11 @@ import Products from "./pages/Products";
 import Product from "./pages/Product";
 import { useEffect } from "react";
 import SellProduct from "./pages/Sell";
-import SellerDashboard from "./pages/Sell";
+import SellerDashboard from "./pages/SellerDashboard";
 import SearchResults from "./pages/SearchResults";
 import Checkout from "./pages/Checkout";
 import { AuthProvider } from "./context/AuthContext";
+import { ProductProvider } from "./context/productContext";
 const App = () => {
   const ScrollToTop = () => {
     const { pathname } = useLocation();
@@ -23,6 +24,7 @@ const App = () => {
   return (
     
     <div className="font-poppins">
+      <ProductProvider>
       <AuthProvider>
       <Header />
       <ScrollToTop />
@@ -39,6 +41,7 @@ const App = () => {
       </Routes>
       <Footer />
       </AuthProvider>
+      </ProductProvider>
     </div>
   );
 };
