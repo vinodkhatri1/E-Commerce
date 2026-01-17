@@ -47,6 +47,7 @@ const Header = () => {
           product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.brand.toLowerCase().includes(searchTerm.toLowerCase())
       ).slice(0, 6); // Limit to top 6 suggestions
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions(filtered);
       setShowSuggestions(true);
     } else {
@@ -275,7 +276,8 @@ const Header = () => {
               onClick={() => setIsOpenLogIn(false)}
             />
             <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4">
-              <LogIn />
+              {/* UPDATED: Passing the onClose prop to the LogIn component */}
+              <LogIn onClose={() => setIsOpenLogIn(false)} />
             </div>
           </>
         )}
