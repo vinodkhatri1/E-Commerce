@@ -98,28 +98,18 @@ const UserProfile = () => {
 
   const handlePayment = () => {
     if (cart.length === 0) return;
-    if (!addressInfo.address || !addressInfo.city) {
-      alert("Please complete your Delivery Address first.");
+
+    // 1. Validate that the user has filled in at least the basic address info
+    if (!addressInfo.address || !addressInfo.city || !addressInfo.zip) {
+      alert("Please complete your Delivery Address details before proceeding.");
       return;
     }
-    const orderID = `SLT-${Math.floor(1000 + Math.random() * 9000)}-ZP`;
-    const newOrder = {
-      id: orderID,
-      date: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      total: total,
-      status: "Processing",
-      items: [...cart],
-      shippingDetails: addressInfo,
-    };
-    const updated = [newOrder, ...orders];
-    setOrders(updated);
-    localStorage.setItem(`orders_${user.email}`, JSON.stringify(updated));
-    clearCart();
-    alert(`Order ${orderID} successful!`);
+
+    // 2. Ensure the latest address info is saved so Checkout can pull it
+    localStorage.setItem(`address_${user.email}`, JSON.stringify(addressInfo));
+
+    // 3. Navigate to the specialized Checkout page
+    navigate("/checkout");
   };
 
   if (!user)
