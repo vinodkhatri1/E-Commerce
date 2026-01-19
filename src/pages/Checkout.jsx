@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext"; // Added Auth import
 import {
   Truck,
   CreditCard,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-// Fixed: Component moved OUTSIDE to prevent focus loss issues
 const InputField = ({
   label,
   name,
@@ -27,7 +27,7 @@ const InputField = ({
   colSpan = "",
 }) => (
   <div className={colSpan}>
-    <label className="block text-sm font-bold text-slate-700 mb-2">
+    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
       {label} <span className="text-red-500">*</span>
     </label>
     <div className="relative">
@@ -37,15 +37,15 @@ const InputField = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full p-3.5 bg-slate-50 border rounded-2xl outline-none transition-all ${
+        className={`w-full p-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm font-bold ${
           error
             ? "border-red-500 focus:ring-4 focus:ring-red-500/10"
-            : "border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500"
+            : "border-slate-100 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500"
         }`}
       />
       {error && (
-        <div className="flex items-center gap-1 mt-1 text-red-500 text-xs font-bold animate-in fade-in">
-          <AlertCircle size={14} />
+        <div className="flex items-center gap-1 mt-1 text-red-500 text-[10px] font-bold animate-in fade-in">
+          <AlertCircle size={12} />
           <span>{error}</span>
         </div>
       )}
@@ -54,7 +54,6 @@ const InputField = ({
 );
 
 const Checkout = () => {
-  // Destructure functions from context
   const {
     cart,
     addToCart,
@@ -63,6 +62,7 @@ const Checkout = () => {
     clearCart,
     closeCart,
   } = useCart();
+  const { user } = useAuth(); // Access user info
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] = useState("card");
@@ -79,9 +79,38 @@ const Checkout = () => {
     cvc: "",
   });
 
+  // --- AUTO-ADD INFORMATION LOGIC ---
+  useEffect(() => {
+    if (user?.email) {
+      // 1. Try to get saved address from the profile settings
+      const savedAddress = localStorage.getItem(`address_${user.email}`);
+
+      if (savedAddress) {
+        const parsed = JSON.parse(savedAddress);
+        setFormData((prev) => ({
+          ...prev,
+          email: parsed.email || user.email,
+          firstName: parsed.firstName || "",
+          lastName: parsed.lastName || "",
+          address: parsed.address || "",
+          city: parsed.city || "",
+          zipCode: parsed.zip || "", // Mapping 'zip' from profile to 'zipCode' here
+        }));
+      } else {
+        // 2. If no saved address, at least pre-fill the email and name from Auth
+        setFormData((prev) => ({
+          ...prev,
+          email: user.email,
+          firstName: user.name?.split(" ")[0] || "",
+          lastName: user.name?.split(" ")[1] || "",
+        }));
+      }
+    }
+  }, [user]);
+
   const subtotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   );
   const shipping = subtotal > 500 ? 0 : 25;
   const total = subtotal + shipping;
@@ -122,10 +151,39 @@ const Checkout = () => {
       return;
     }
 
+    // Save to order history for UserProfile
+    const orderID = `SLT-${Math.floor(1000 + Math.random() * 9000)}-ZP`;
+    const newOrder = {
+      id: orderID,
+      date: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      total: total.toFixed(2),
+      status: "Processing",
+      items: [...cart],
+      shippingDetails: {
+        address: formData.address,
+        city: formData.city,
+        zip: formData.zipCode,
+      },
+    };
+
+    if (user?.email) {
+      const existingOrders = JSON.parse(
+        localStorage.getItem(`orders_${user.email}`) || "[]",
+      );
+      localStorage.setItem(
+        `orders_${user.email}`,
+        JSON.stringify([newOrder, ...existingOrders]),
+      );
+    }
+
     clearCart();
     closeCart();
-    alert("Order Successful!");
-    navigate("/");
+    alert(`Order ${orderID} Placed Successfully!`);
+    navigate("/profile"); // Navigate to profile to see the new order
   };
 
   if (cart.length === 0)
@@ -145,25 +203,23 @@ const Checkout = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen py-10">
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <form onSubmit={handlePlaceOrder} className="lg:col-span-7 space-y-8">
-          {/* Shipping Section */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
+      <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <form onSubmit={handlePlaceOrder} className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-blue-600 p-2 rounded-xl text-white">
-                <MapPin size={22} />
+                <MapPin size={20} />
               </div>
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                Delivery Address
+              <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+                Delivery Details
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <InputField
                 label="Email"
                 name="email"
                 type="email"
-                placeholder="email@example.com"
                 colSpan="md:col-span-2"
                 value={formData.email}
                 onChange={handleInputChange}
@@ -172,7 +228,6 @@ const Checkout = () => {
               <InputField
                 label="First Name"
                 name="firstName"
-                placeholder="John"
                 value={formData.firstName}
                 onChange={handleInputChange}
                 error={validationErrors.firstName}
@@ -180,7 +235,6 @@ const Checkout = () => {
               <InputField
                 label="Last Name"
                 name="lastName"
-                placeholder="Doe"
                 value={formData.lastName}
                 onChange={handleInputChange}
                 error={validationErrors.lastName}
@@ -188,7 +242,6 @@ const Checkout = () => {
               <InputField
                 label="Address"
                 name="address"
-                placeholder="123 Street"
                 colSpan="md:col-span-2"
                 value={formData.address}
                 onChange={handleInputChange}
@@ -197,7 +250,6 @@ const Checkout = () => {
               <InputField
                 label="City"
                 name="city"
-                placeholder="City"
                 value={formData.city}
                 onChange={handleInputChange}
                 error={validationErrors.city}
@@ -205,7 +257,6 @@ const Checkout = () => {
               <InputField
                 label="ZIP Code"
                 name="zipCode"
-                placeholder="00000"
                 value={formData.zipCode}
                 onChange={handleInputChange}
                 error={validationErrors.zipCode}
@@ -213,48 +264,40 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* Payment Section */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-green-600 p-2 rounded-xl text-white">
-                <CreditCard size={22} />
+                <CreditCard size={20} />
               </div>
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                Payment
+              <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+                Payment Method
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <button
                 type="button"
                 onClick={() => setPaymentMethod("card")}
-                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-2xl transition-all ${
-                  paymentMethod === "card"
-                    ? "border-blue-600 bg-blue-50 text-blue-600"
-                    : "border-slate-100 text-slate-400"
-                }`}
+                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-2xl transition-all ${paymentMethod === "card" ? "border-blue-600 bg-blue-50 text-blue-600" : "border-slate-50 text-slate-300"}`}
               >
-                <CreditCard /> <span className="font-bold">Card</span>
+                <CreditCard size={20} />{" "}
+                <span className="text-[10px] font-black uppercase">Card</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPaymentMethod("cod")}
-                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-2xl transition-all ${
-                  paymentMethod === "cod"
-                    ? "border-blue-600 bg-blue-50 text-blue-600"
-                    : "border-slate-100 text-slate-400"
-                }`}
+                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-2xl transition-all ${paymentMethod === "cod" ? "border-blue-600 bg-blue-50 text-blue-600" : "border-slate-50 text-slate-300"}`}
               >
-                <Banknote /> <span className="font-bold">Cash</span>
+                <Banknote size={20} />{" "}
+                <span className="text-[10px] font-black uppercase">Cash</span>
               </button>
             </div>
 
             {paymentMethod === "card" ? (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-5">
                 <InputField
                   label="Card Number"
                   name="cardNumber"
-                  placeholder="0000 0000 0000 0000"
                   colSpan="col-span-2"
                   value={formData.cardNumber}
                   onChange={handleInputChange}
@@ -279,114 +322,73 @@ const Checkout = () => {
               </div>
             ) : (
               <div className="p-4 bg-slate-900 rounded-2xl text-white">
-                <p className="font-bold">Cash on Delivery</p>
-                <p className="text-slate-400 text-sm mt-1">
-                  Pay <b>${total.toFixed(2)}</b> when your order arrives.
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1">
+                  Pay on Delivery
                 </p>
+                <p className="font-black text-lg">${total.toFixed(2)}</p>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full mt-10 bg-slate-900 text-white py-5 rounded-2xl font-black text-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-all active:scale-[0.98]"
+              className="w-full mt-10 bg-blue-600 text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-3 hover:bg-blue-500 transition-all uppercase tracking-[0.2em]"
             >
               {paymentMethod === "cod"
                 ? "Place Order"
                 : `Pay $${total.toFixed(2)}`}
-              <ArrowRight size={22} />
+              <ArrowRight size={18} />
             </button>
           </div>
         </form>
 
-        {/* Summary Side with Quantity Controls */}
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 sticky top-28">
-            <h2 className="text-2xl font-black text-slate-800 mb-8 tracking-tighter uppercase">
+          <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 sticky top-28">
+            <h2 className="text-sm font-black text-slate-900 mb-6 uppercase tracking-widest border-b pb-4 border-slate-50">
               Order Summary
             </h2>
-
-            <div className="space-y-6 mb-8 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-4 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
-                  {/* Image Container */}
-                  <div className="w-20 h-20 bg-slate-50 rounded-2xl p-2 border border-slate-100 shrink-0">
+                  <div className="w-14 h-14 bg-slate-50 rounded-xl p-2 border border-slate-100 shrink-0">
                     <img
                       src={`/image/${item.category}/${item.image}`}
                       className="w-full h-full object-contain"
                       alt={item.title}
                     />
                   </div>
-
-                  {/* Info and Quantity Controls */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-slate-800 truncate uppercase tracking-tight">
+                    <p className="text-[11px] font-black text-slate-800 truncate uppercase">
                       {item.title}
                     </p>
-                    <p className="text-xs font-bold text-blue-500 uppercase mb-2 tracking-widest">
-                      {item.category}
-                    </p>
-
-                    {/* Quantity Selector */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 overflow-hidden">
-                        <button
-                          type="button"
-                          onClick={() => decreaseQuantity(item.id)}
-                          className="p-1 hover:bg-slate-200 text-slate-600 transition-colors"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-8 text-center text-xs font-black text-slate-900">
-                          {item.quantity}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => addToCart(item)}
-                          className="p-1 hover:bg-slate-200 text-slate-600 transition-colors"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-bold text-slate-400">
+                        QTY: {item.quantity}
+                      </span>
+                      <span className="text-[10px] font-black text-blue-600">
+                        ${item.price}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Price */}
-                  <p className="font-black text-slate-900 text-right shrink-0">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </p>
                 </div>
               ))}
             </div>
 
-            {/* Totals Section */}
-            <div className="border-t border-slate-100 pt-6 space-y-3">
-              <div className="flex justify-between font-bold text-slate-500">
+            <div className="space-y-3 pt-4 border-t border-slate-50">
+              <div className="flex justify-between text-[11px] font-black text-slate-400 uppercase">
                 <span>Subtotal</span>
                 <span className="text-slate-900">${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-slate-500">
+              <div className="flex justify-between text-[11px] font-black text-slate-400 uppercase">
                 <span>Delivery</span>
                 <span className="text-green-600">
                   {shipping === 0 ? "FREE" : `$${shipping}`}
                 </span>
               </div>
-              <div className="flex justify-between pt-4 border-t border-slate-100 mt-2 items-center">
-                <span className="text-3xl font-black text-slate-900 tracking-tighter">
+              <div className="flex justify-between pt-4 items-center">
+                <span className="text-2xl font-black text-slate-900 tracking-tighter">
                   ${total.toFixed(2)}
                 </span>
-                <div className="flex items-center gap-1 px-3 py-1 bg-slate-100 rounded-full">
-                  <ShieldCheck className="text-slate-500" size={16} />
-                  <span className="text-[10px] font-black text-slate-600 uppercase">
-                    Secure
-                  </span>
-                </div>
+                <ShieldCheck className="text-green-500" size={20} />
               </div>
             </div>
           </div>

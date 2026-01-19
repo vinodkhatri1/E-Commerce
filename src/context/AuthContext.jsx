@@ -1,38 +1,36 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => useContext(AuthContext);
-
 export const AuthProvider = ({ children }) => {
-  // 1. User State (null = not logged in, object = logged in)
-  const [user, setUser] = useState(null);
-
-  // 2. Modal State (Controls visibility globally)
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  // Actions
+  // Initialize user from LocalStorage
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("activeUser");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const openLogin = () => setIsLoginOpen(true);
+  const closeLogin = () => setIsLoginOpen(false);
+
   const login = (userData) => {
-    setUser(userData); // Set user data (e.g., { name: "John" })
-    setIsLoginOpen(false); // Close modal automatically
+    setUser(userData);
+    localStorage.setItem("activeUser", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("activeUser");
   };
-
-  const openLogin = () => setIsLoginOpen(true);
-  const closeLogin = () => setIsLoginOpen(false);
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isLoggedIn: !!user, // boolean helper
-        isLoginOpen,
         login,
         logout,
+        isLoginOpen,
         openLogin,
         closeLogin,
       }}
@@ -41,3 +39,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);
