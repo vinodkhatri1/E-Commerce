@@ -36,8 +36,7 @@ const Cart = ({ setIsOpenCart }) => {
       />
 
       {/* Main Cart Drawer */}
-      <div className="fixed top-0 right-0 z-50 w-full sm:w-[450px] h-screen bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
-        
+      <div className="fixed top-0 right-0 z-50 w-full sm:w-112.5 h-screen bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
         {/* Header */}
         <div className="h-20 flex justify-between items-center px-8 border-b border-gray-100">
           <div>
@@ -70,7 +69,7 @@ const Cart = ({ setIsOpenCart }) => {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Your cart is empty
               </h2>
-              <p className="text-gray-500 max-w-[250px] mx-auto leading-relaxed">
+              <p className="text-gray-500 max-w-62.5 mx-auto leading-relaxed">
                 Looks like you haven't added anything to your cart yet.
               </p>
               <Link to="/products">
@@ -97,7 +96,9 @@ const Cart = ({ setIsOpenCart }) => {
             <div className="space-y-3 mb-8">
               <div className="flex justify-between items-center text-gray-600">
                 <span className="font-medium">Subtotal</span>
-                <span className="font-bold text-gray-900">${total.toFixed(2)}</span>
+                <span className="font-bold text-gray-900">
+                  ${total.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between items-center text-gray-600">
                 <span className="font-medium">Shipping</span>
