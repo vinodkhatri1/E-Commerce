@@ -1,140 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import Stars from "./Stars";
+import DetailedOrderCard from "./DetailedOrderCard";
 import {
-  ShoppingBag,
-  Package,
-  LogOut,
   Clock,
   Trash2,
   ArrowRight,
-  ShieldCheck,
   Plus,
   Minus,
-  CreditCard,
   CheckCircle,
-  ChevronDown,
-  Hash,
   MapPin,
-  Mail,
   Save,
   Loader2,
+  AlertTriangle,
+  LogOut,
 } from "lucide-react";
 
-// --- SUB-COMPONENT: DETAILED ORDER ITEM ---
-const DetailedOrderCard = ({ order }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all hover:border-blue-200 shadow-sm">
-      <div className="p-4 flex items-center justify-between bg-slate-50/50 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-lg text-white">
-            <Hash size={12} />
-          </div>
-          <div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-              Tracking Number
-            </p>
-            <p className="text-[13px] font-black text-slate-900 font-mono tracking-tighter uppercase">
-              {order.id}
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-            Paid Total
-          </p>
-          <p className="text-[13px] font-black text-blue-600">${order.total}</p>
-        </div>
-      </div>
-
-      <div className="px-4 py-3">
-        <div className="flex justify-between items-center mb-1.5">
-          <span
-            className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest 
-            ${order.status === "Processing" ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"}`}
-          >
-            {order.status}
-          </span>
-          <span className="text-[9px] font-bold text-slate-400 uppercase">
-            {order.date}
-          </span>
-        </div>
-        <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full transition-all duration-1000 ${order.status === "Processing" ? "w-1/3 bg-blue-500" : "w-full bg-green-500"}`}
-          />
-        </div>
-      </div>
-
-      <div className="px-4 pb-3">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-blue-600 py-1 transition-colors"
-        >
-          {isOpen ? "Hide Details" : `View ${order.items.length} Items`}
-          <ChevronDown
-            size={14}
-            className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-          />
-        </button>
-
-        {isOpen && (
-          <div className="mt-3 space-y-2 pt-2 border-t border-slate-50">
-            <div className="mb-3 p-2 bg-slate-50 rounded-lg border border-slate-100">
-              <p className="text-[8px] font-black text-slate-400 uppercase mb-1">
-                Shipping To:
-              </p>
-              <p className="text-[10px] text-slate-600 leading-tight">
-                {order.shippingDetails?.address}, {order.shippingDetails?.city}{" "}
-                {order.shippingDetails?.zip}
-              </p>
-            </div>
-            {order.items.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-slate-50 rounded-lg p-1 border border-slate-100 shrink-0 flex items-center justify-center">
-                  <img
-                    src={`/image/${item.category}/${item.image}`}
-                    className="w-full h-full object-contain mix-blend-multiply"
-                    alt=""
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold text-slate-700 truncate leading-none">
-                    {item.title}
-                  </p>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">
-                    Qty: {item.quantity || 1}
-                  </p>
-                </div>
-                <p className="text-[11px] font-black text-slate-900">
-                  ${item.price}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// --- MAIN PROFILE COMPONENT ---
 const UserProfile = () => {
   const { user, logout } = useAuth();
   const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart } =
     useCart();
   const navigate = useNavigate();
 
-  // States
   const [orders, setOrders] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // Safety toggle
   const [addressInfo, setAddressInfo] = useState({
-    email: user?.email || "",
+    email: "",
     firstName: "",
     lastName: "",
     address: "",
@@ -142,25 +36,48 @@ const UserProfile = () => {
     zip: "",
   });
 
-  // Load user data & orders
   useEffect(() => {
     if (user?.email) {
       const savedOrders = localStorage.getItem(`orders_${user.email}`);
       const savedAddress = localStorage.getItem(`address_${user.email}`);
+
       if (savedOrders) setOrders(JSON.parse(savedOrders));
-      if (savedAddress) setAddressInfo(JSON.parse(savedAddress));
+      if (savedAddress) {
+        setAddressInfo(JSON.parse(savedAddress));
+      } else {
+        setAddressInfo((prev) => ({ ...prev, email: user.email }));
+      }
     }
   }, [user]);
 
+  // --- DELETE ACCOUNT LOGIC ---
+  const handleDeleteAccount = () => {
+    if (!user?.email) return;
+
+    // 1. Remove from global users list
+    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    const updatedUsers = allUsers.filter((u) => u.email !== user.email);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+    // 2. Wipe user-specific data
+    localStorage.removeItem(`orders_${user.email}`);
+    localStorage.removeItem(`address_${user.email}`);
+
+    // 3. Logout and redirect
+    logout();
+    navigate("/");
+    alert("Account permanently deleted.");
+  };
+
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
-    setAddressInfo({ ...addressInfo, [name]: value });
-    if (saveSuccess) setSaveSuccess(false); // Reset success state on change
+    setAddressInfo((prev) => ({ ...prev, [name]: value }));
+    if (saveSuccess) setSaveSuccess(false);
   };
 
   const saveProfileDetails = () => {
+    if (!user?.email) return;
     setIsSaving(true);
-    // Simulate API delay for premium feel
     setTimeout(() => {
       localStorage.setItem(
         `address_${user.email}`,
@@ -168,8 +85,6 @@ const UserProfile = () => {
       );
       setIsSaving(false);
       setSaveSuccess(true);
-
-      // Clear success icon after 3 seconds
       setTimeout(() => setSaveSuccess(false), 3000);
     }, 800);
   };
@@ -187,7 +102,6 @@ const UserProfile = () => {
       alert("Please complete your Delivery Address first.");
       return;
     }
-
     const orderID = `SLT-${Math.floor(1000 + Math.random() * 9000)}-ZP`;
     const newOrder = {
       id: orderID,
@@ -201,7 +115,6 @@ const UserProfile = () => {
       items: [...cart],
       shippingDetails: addressInfo,
     };
-
     const updated = [newOrder, ...orders];
     setOrders(updated);
     localStorage.setItem(`orders_${user.email}`, JSON.stringify(updated));
@@ -212,7 +125,7 @@ const UserProfile = () => {
   if (!user)
     return (
       <div className="p-20 text-center font-black text-slate-300 uppercase tracking-widest">
-        Loading...
+        Loading Profile...
       </div>
     );
 
@@ -223,18 +136,18 @@ const UserProfile = () => {
         <aside className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 text-center">
             <img
-              src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}&backgroundColor=2563eb`}
+              src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name || "User"}&backgroundColor=2563eb`}
               className="w-20 h-20 rounded-2xl mx-auto mb-4"
-              alt="P"
+              alt="Avatar"
             />
             <h2 className="text-xl font-black text-slate-900 tracking-tight">
               {user.name}
             </h2>
             <button
               onClick={logout}
-              className="mt-4 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors"
+              className="mt-4 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors flex items-center justify-center gap-2 mx-auto"
             >
-              Secure Logout
+              <LogOut size={12} /> Secure Logout
             </button>
           </div>
 
@@ -248,22 +161,54 @@ const UserProfile = () => {
                   No orders yet
                 </p>
               ) : (
-                orders.map((o, i) => <DetailedOrderCard key={i} order={o} />)
+                orders.map((o) => <DetailedOrderCard key={o.id} order={o} />)
               )}
             </div>
           </div>
+
+          {/* DANGER ZONE */}
+          <div className="bg-red-50/50 rounded-[2rem] p-6 border border-red-100">
+            <h3 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <AlertTriangle size={14} /> Danger Zone
+            </h3>
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full py-3 bg-white border border-red-200 text-red-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm"
+              >
+                Delete Account
+              </button>
+            ) : (
+              <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                <p className="text-[10px] font-bold text-red-600 text-center leading-tight">
+                  This action is permanent. All orders and data will be wiped.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="py-2 bg-red-600 text-white rounded-lg font-black text-[10px] uppercase"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="py-2 bg-slate-200 text-slate-600 rounded-lg font-black text-[10px] uppercase"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </aside>
 
-        {/* RIGHT COLUMN */}
+        {/* RIGHT COLUMN (Form remains same) */}
         <main className="lg:col-span-8 space-y-6">
-          {/* DELIVERY ADDRESS FORM */}
           <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-200 relative">
             <div className="flex justify-between items-start mb-8">
               <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3 uppercase">
                 <MapPin size={20} className="text-blue-600" /> Shipping Details
               </h2>
-
-              {/* SAVE BUTTON WITH LOADING */}
               <button
                 onClick={saveProfileDetails}
                 disabled={isSaving}
@@ -287,7 +232,7 @@ const UserProfile = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1">
+              <div className="md:col-span-2 space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
                   Email
                 </label>
@@ -298,31 +243,29 @@ const UserProfile = () => {
                   className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none transition-all"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4 md:col-span-2">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    First Name
-                  </label>
-                  <input
-                    name="firstName"
-                    value={addressInfo.firstName}
-                    onChange={handleAddressChange}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
-                    placeholder="Alex"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    Last Name
-                  </label>
-                  <input
-                    name="lastName"
-                    value={addressInfo.lastName}
-                    onChange={handleAddressChange}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
-                    placeholder="Doe"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  First Name
+                </label>
+                <input
+                  name="firstName"
+                  value={addressInfo.firstName}
+                  onChange={handleAddressChange}
+                  placeholder="Alex"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Last Name
+                </label>
+                <input
+                  name="lastName"
+                  value={addressInfo.lastName}
+                  onChange={handleAddressChange}
+                  placeholder="Doe"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
+                />
               </div>
               <div className="md:col-span-2 space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
@@ -332,8 +275,8 @@ const UserProfile = () => {
                   name="address"
                   value={addressInfo.address}
                   onChange={handleAddressChange}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
                   placeholder="123 Street Name"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
                 />
               </div>
               <div className="space-y-1">
@@ -344,8 +287,8 @@ const UserProfile = () => {
                   name="city"
                   value={addressInfo.city}
                   onChange={handleAddressChange}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
                   placeholder="New York"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
                 />
               </div>
               <div className="space-y-1">
@@ -356,14 +299,13 @@ const UserProfile = () => {
                   name="zip"
                   value={addressInfo.zip}
                   onChange={handleAddressChange}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
                   placeholder="10001"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* ACTIVE CART */}
           <div className="space-y-4 pt-4">
             <h2 className="text-xl font-black text-slate-900 px-2 tracking-tight uppercase flex items-center justify-between">
               Current Bag
@@ -380,7 +322,7 @@ const UserProfile = () => {
                   <img
                     src={`/image/${item.category}/${item.image}`}
                     className="h-full object-contain"
-                    alt=""
+                    alt={item.title}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -418,7 +360,6 @@ const UserProfile = () => {
                 </button>
               </div>
             ))}
-
             {cart.length > 0 && (
               <div className="mt-8 bg-slate-900 rounded-[2rem] p-7 text-white shadow-xl flex flex-col sm:flex-row justify-between items-center gap-6 border border-slate-800">
                 <div>

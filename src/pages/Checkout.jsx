@@ -205,7 +205,7 @@ const Checkout = () => {
     <div className="bg-slate-50 min-h-screen py-10">
       <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
         <form onSubmit={handlePlaceOrder} className="lg:col-span-7 space-y-6">
-          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-blue-600 p-2 rounded-xl text-white">
                 <MapPin size={20} />
@@ -264,7 +264,7 @@ const Checkout = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-green-600 p-2 rounded-xl text-white">
                 <CreditCard size={20} />
@@ -342,11 +342,11 @@ const Checkout = () => {
         </form>
 
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 sticky top-28">
+          <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 sticky top-28">
             <h2 className="text-sm font-black text-slate-900 mb-6 uppercase tracking-widest border-b pb-4 border-slate-50">
               Order Summary
             </h2>
-            <div className="space-y-4 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-4 mb-8 max-h-100 overflow-y-auto pr-2 custom-scrollbar">
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
                   <div className="w-14 h-14 bg-slate-50 rounded-xl p-2 border border-slate-100 shrink-0">

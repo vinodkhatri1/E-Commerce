@@ -209,7 +209,7 @@ const Header = () => {
         />
 
         <div
-          className={`fixed top-0 right-0 h-full w-[280px] bg-white z-40 shadow-2xl transform transition-transform duration-300 lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`fixed top-0 right-0 h-full w-70 bg-white z-40 shadow-2xl transform transition-transform duration-300 lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           <div className="flex flex-col h-full pt-20 px-6">
             {user ? (
