@@ -15,13 +15,13 @@ const Product = () => {
 
   const product = ProductData.find((p) => p.id === Number(id));
   const [image, setImage] = useState("");
-const { isLoggedIn, openLogin } = useAuth();
+  const { isLoggedIn, openLogin } = useAuth();
 
-const handleBuyNow = () => {
+  const handleBuyNow = () => {
     // 3. THE CHECK: Is user logged in?
     if (!isLoggedIn) {
       openLogin(); // If no, open the modal immediately
-      return;      // Stop here. Do not add to cart.
+      return; // Stop here. Do not add to cart.
     }
 
     // If yes, proceed normally
@@ -48,7 +48,7 @@ const handleBuyNow = () => {
   const pic = [`/image/${product.category}/${product.image}`];
 
   const similarProducts = ProductData.filter(
-    (p) => p.category === product.category && p.id !== product.id
+    (p) => p.category === product.category && p.id !== product.id,
   );
 
   return (
@@ -131,13 +131,13 @@ const handleBuyNow = () => {
               Add to Cart
             </button>
 
-          <button
-  onClick={handleBuyNow}
-  className="flex-1 h-14 bg-gray-900 hover:bg-black text-white rounded-xl font-bold text-lg shadow-xl shadow-gray-200 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
->
-  <CreditCard size={22} />
-  Buy Now
-</button>
+            <button
+              onClick={handleBuyNow}
+              className="flex-1 h-12 bg-gray-900 hover:bg-black text-white rounded-xl font-bold text-lg shadow-xl shadow-gray-200 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <CreditCard size={20} />
+              Buy Now
+            </button>
           </div>
         </div>
       </div>
