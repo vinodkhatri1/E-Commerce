@@ -124,7 +124,7 @@ const UserProfile = () => {
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LEFT COLUMN */}
         <aside className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 text-center">
+          <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 text-center">
             <img
               src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name || "User"}&backgroundColor=2563eb`}
               className="w-20 h-20 rounded-2xl mx-auto mb-4"
@@ -141,7 +141,7 @@ const UserProfile = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
               <Clock size={14} className="text-blue-600" /> Order History
             </h3>
@@ -157,7 +157,7 @@ const UserProfile = () => {
           </div>
 
           {/* DANGER ZONE */}
-          <div className="bg-red-50/50 rounded-[2rem] p-6 border border-red-100">
+          <div className="bg-red-50/50 rounded-4xl p-6 border border-red-100">
             <h3 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2">
               <AlertTriangle size={14} /> Danger Zone
             </h3>
@@ -194,7 +194,7 @@ const UserProfile = () => {
 
         {/* RIGHT COLUMN (Form remains same) */}
         <main className="lg:col-span-8 space-y-6">
-          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-200 relative">
+          <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200 relative">
             <div className="flex justify-between items-start mb-8">
               <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3 uppercase">
                 <MapPin size={20} className="text-blue-600" /> Shipping Details
@@ -351,7 +351,7 @@ const UserProfile = () => {
               </div>
             ))}
             {cart.length > 0 && (
-              <div className="mt-8 bg-slate-900 rounded-[2rem] p-7 text-white shadow-xl flex flex-col sm:flex-row justify-between items-center gap-6 border border-slate-800">
+              <div className="mt-8 bg-slate-900 rounded-4xl p-7 text-white shadow-xl flex flex-col sm:flex-row justify-between items-center gap-6 border border-slate-800">
                 <div>
                   <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1">
                     Due Now
