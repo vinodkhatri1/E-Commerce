@@ -124,9 +124,6 @@ const Cart = ({ setIsOpenCart }) => {
                 </>
               )}
             </button>
-            <p className="text-center text-xs text-gray-400 mt-4 font-medium">
-              Secure checkout powered by Stripe
-            </p>
           </div>
         )}
       </div>
