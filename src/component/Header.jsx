@@ -149,6 +149,12 @@ const Header = () => {
                 >
                   My Profile
                 </Link>
+                <Link
+                  to="/seller-dashboard"
+                  className="block p-2 hover:bg-gray-100 rounded text-sm font-medium"
+                >
+                  Seller Dashboard
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full text-left p-2 hover:bg-red-50 text-red-600 rounded text-sm flex items-center gap-2 border-t mt-1"
