@@ -2,27 +2,29 @@ import { X, ArrowRight, Lock } from "lucide-react";
 import CartCard from "./CartCard";
 import EmptyBaskat from "../assets/EmptyCart.png";
 import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext"; // 1. Import Auth Context
+import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 
 const Cart = ({ setIsOpenCart }) => {
   const { cart } = useCart();
-  const { user, openLogin } = useAuth(); // 2. Get user state and openLogin function
+  const { user, openLogin } = useAuth();
   const navigate = useNavigate();
   const emptyCart = cart.length === 0;
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Logic calculation
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+  const shipping = subtotal > 500 || subtotal === 0 ? 0 : 25;
+  const total = (subtotal + shipping).toFixed(2);
 
-  // Function to handle checkout button click
   const handleCheckout = () => {
-    // A. Check Authorization
     if (!user) {
-      setIsOpenCart(false); // Close the cart drawer first
-      openLogin(); // Open the Global Login Modal
+      setIsOpenCart(false);
+      openLogin();
       return;
     }
-
-    // B. Proceed if logged in
     setIsOpenCart(false);
     navigate("/checkout");
   };
@@ -97,16 +99,20 @@ const Cart = ({ setIsOpenCart }) => {
               <div className="flex justify-between items-center text-gray-600">
                 <span className="font-medium">Subtotal</span>
                 <span className="font-bold text-gray-900">
-                  ${total.toFixed(2)}
+                  ${subtotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center text-gray-600">
                 <span className="font-medium">Shipping</span>
-                <span className="text-sm text-green-600 font-bold">Free</span>
+                <span
+                  className={`font-bold ${shipping === 0 ? "text-green-600" : "text-gray-900"}`}
+                >
+                  {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                </span>
               </div>
               <div className="flex justify-between items-center text-xl font-bold text-gray-900 pt-4 border-t border-gray-50">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>${total}</span>
               </div>
             </div>
 
