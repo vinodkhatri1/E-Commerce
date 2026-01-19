@@ -188,7 +188,7 @@ const Header = () => {
               onClick={!user ? openLogin : undefined}
             >
               {user ? (
-                <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-md ring-2 ring-white">
+                <div className="w-10 h-10 bg-linear-to-tr from-indigo-600 to-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-md ring-2 ring-white">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
               ) : (
@@ -209,17 +209,17 @@ const Header = () => {
                   </div>
                   <div className="p-2 space-y-1">
                     <Link
-                      to="/profile"
+                      to="/UserProfile"
                       className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors"
                     >
                       <User size={18} /> My Profile
                     </Link>
-                    <Link
+                    {/* <Link
                       to="/orders"
                       className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors"
                     >
                       <Package size={18} /> Orders
-                    </Link>
+                    </Link> */}
                   </div>
                   <div className="p-2 border-t border-gray-100">
                     <button
