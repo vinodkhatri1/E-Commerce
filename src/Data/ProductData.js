@@ -1,4 +1,4 @@
-const ProductData = [
+const originalData = [
   /* ================= BEAUTY ================= */
   {
     id: 1,
@@ -548,5 +548,15 @@ const ProductData = [
     description: "Gentle hand soap enriched with plant-based ingredients for soft and clean hands."
   }
 ];
+const getLiveDashboardData = () => {
+  const saved = localStorage.getItem("seller_inventory");
+  if (saved) {
+    return JSON.parse(saved);
+  }
+  return originalData;
+};
+
+// We export the RESULT of the function
+const ProductData = getLiveDashboardData();
 
 export default ProductData;
