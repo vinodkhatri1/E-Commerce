@@ -183,7 +183,7 @@ const Header = () => {
 
           {/* THE SELL BUTTON (Desktop) */}
           <Link
-            to="/sell"
+            to="/AddSellProduct"
             className="hidden md:flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-full font-bold hover:scale-105 transition-all text-sm shrink-0"
           >
             Sell
@@ -239,7 +239,7 @@ const Header = () => {
             <nav className="space-y-4 flex-1">
               {/* SELL BUTTON (Inside Mobile Menu) */}
               <Link
-                to="/sell"
+                to="/AddSellProduct"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 text-lg font-bold text-blue-600 py-2 border-b"
               >

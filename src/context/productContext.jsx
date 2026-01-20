@@ -1,35 +1,59 @@
 import { createContext, useContext, useState } from "react";
-import initialData from "../Data/ProductData"; 
+import ProductData from "../Data/ProductData"; // Your static data
 
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-  // Initialize with your static data
-  const [products, setProducts] = useState(initialData);
+  // We initialize state from LocalStorage if it exists, otherwise use static Data
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem("seller_inventory");
+    return saved ? JSON.parse(saved) : ProductData;
+  });
 
-  // Function to add a new item (Seller Mode)
-  const addProduct = (newItem) => {
-    const itemWithId = { 
-        ...newItem, 
-        id: Date.now(), // Generate a unique ID
-        rating: 0,      // Default rating
-        reviews: [] 
-    };
-    setProducts((prev) => [itemWithId, ...prev]); // Add to top of list
+  const categories = [...new Set(ProductData.map((p) => p.category))];
+
+  // --- DELETE FUNCTION ---
+  const deleteProduct = (id) => {
+    if (window.confirm("Are you sure you want to delete this?")) {
+      const updated = products.filter((p) => p.id !== id);
+      localStorage.setItem("seller_inventory", JSON.stringify(updated));
+      window.location.reload(); // This forces the "import ProductData" to update everywhere
+    }
   };
 
-  // Function to get all unique categories
-  const getCategories = () => {
-    const categories = [...new Set(products.map((product) => product.category))];
-    return categories;
+  // --- ADD FUNCTION ---
+  const addProduct = (data) => {
+    const updated = [{ ...data, id: Date.now() }, ...products];
+    localStorage.setItem("seller_inventory", JSON.stringify(updated));
+    window.location.reload();
+  };
+
+  // --- UPDATE FUNCTION ---
+  const updateProduct = (id, data) => {
+    const updated = products.map((p) => (p.id === id ? { ...p, ...data } : p));
+    localStorage.setItem("seller_inventory", JSON.stringify(updated));
+    window.location.reload();
+  };
+
+  const resetData = () => {
+    localStorage.removeItem("seller_inventory");
+    window.location.reload();
   };
 
   return (
-    <ProductContext.Provider value={{ products, addProduct, getCategories }}>
+    <ProductContext.Provider
+      value={{
+        products,
+        categories,
+        deleteProduct,
+        addProduct,
+        updateProduct,
+        resetData,
+      }}
+    >
       {children}
     </ProductContext.Provider>
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useProducts = () => useContext(ProductContext);
