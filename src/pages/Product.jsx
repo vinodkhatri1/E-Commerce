@@ -31,12 +31,15 @@ const Product = () => {
   useEffect(() => {
     if (product) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setImage(`/image/${product.category}/${product.image}`);
+      setImage(
+        product.image?.startsWith("data:")
+          ? product.image
+          : `/image/${product.category}/${product.image}`,
+      );
       // Scroll to top when product changes
       window.scrollTo(0, 0);
     }
   }, [id, product]);
-
   if (!product)
     return (
       <div className="p-10 text-center text-xl text-red-500">
@@ -45,7 +48,11 @@ const Product = () => {
     );
 
   // Assuming product has multiple images, or reusing same for demo
-  const pic = [`/image/${product.category}/${product.image}`];
+  const pic = [
+    product.image?.startsWith("data:")
+      ? product.image
+      : `/image/${product.category}/${product.image}`,
+  ];
 
   const similarProducts = ProductData.filter(
     (p) => p.category === product.category && p.id !== product.id,

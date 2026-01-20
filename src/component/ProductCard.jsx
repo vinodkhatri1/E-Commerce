@@ -9,20 +9,26 @@ const ProductCard = ({ productdt }) => {
 
   return (
     <div className="w-full h-full bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group">
-      
       {/* Image Area */}
       <div className="h-64 p-4 border-b border-gray-100 flex items-center justify-center bg-gray-50 relative overflow-hidden">
-        <Link to={`/products/${productdt.id}`} className="w-full h-full flex justify-center">
+        <Link
+          to={`/products/${productdt.id}`}
+          className="w-full h-full flex justify-center"
+        >
           <img
             className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-110"
-            src={`/image/${productdt.category}/${productdt.image}`}
+            src={
+              productdt.image?.startsWith("data:")
+                ? productdt.image // If it's a new upload, use the string directly
+                : `/image/${productdt.category}/${productdt.image}` // If it's an old file, use the folder path
+            }
             alt={productdt.title}
           />
         </Link>
         {productdt.discountPercent && (
-             <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                 -{productdt.discountPercent}%
-             </span>
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            -{productdt.discountPercent}%
+          </span>
         )}
       </div>
 
@@ -31,7 +37,7 @@ const ProductCard = ({ productdt }) => {
         <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
           {productdt.category}
         </p>
-        
+
         <Link to={`/products/${productdt.id}`}>
           <h2 className="font-bold text-gray-800 text-base mb-2 line-clamp-2 hover:text-blue-600 transition">
             {productdt.title}
@@ -51,9 +57,9 @@ const ProductCard = ({ productdt }) => {
               ${productdt.price}
             </p>
             {productdt.originalPrice && (
-                <span className="text-sm text-gray-400 line-through">
-                  ${productdt.originalPrice}
-                </span>
+              <span className="text-sm text-gray-400 line-through">
+                ${productdt.originalPrice}
+              </span>
             )}
           </div>
 
