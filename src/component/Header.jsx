@@ -1,309 +1,350 @@
 import React, { useState, useEffect, useRef } from "react";
-import logo from "../assets/logo.png";
+import { Link, useNavigate } from "react-router-dom";
 import {
   User,
   ShoppingCart,
-  Moon,
   Search,
   Menu,
   X,
   ChevronDown,
   ChevronRight,
-  LogOut,
-  Package,
+  Heart,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import MegaMenu from "./MegaMenu";
-import Cart from "./Cart";
-import LogIn from "./LogIn";
+
+// --- CONTEXT & DATA ---
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import ProductData from "../Data/ProductData";
+import logo from "../assets/logo.png";
+
+// --- MODALS ---
+import Cart from "./Cart";
+import LogIn from "./LogIn";
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  // Auth & Cart Contexts
   const { user, isLoginOpen, openLogin, closeLogin, logout } = useAuth();
   const { cart, isCartOpen, openCart, closeCart } = useCart();
 
+  // State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCat, setSelectedCat] = useState("All");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const navigate = useNavigate();
-  const searchRef = useRef(null);
-  const inputRef = useRef(null);
-  const isEmpty = cart.length === 0;
+  const searchContainerRef = useRef(null);
 
-  const categories = [...new Set(ProductData?.map((p) => p.category) || [])];
+  // Dynamic Category Extraction
+  const dynamicCategories = [
+    ...new Set(ProductData?.map((p) => p.category) || []),
+  ];
 
   useEffect(() => {
-    if (searchTerm.trim().length > 1) {
-      const filtered = ProductData.filter(
-        (product) =>
-          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchTerm.toLowerCase()),
-      ).slice(0, 6);
+    if (searchTerm.trim().length > 0) {
+      const filtered = ProductData.filter((p) => {
+        const matchesTerm = p.title
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesCategory =
+          selectedCat === "All" || p.category === selectedCat;
+        return matchesTerm && matchesCategory;
+      }).slice(0, 5);
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
-      setShowSuggestions(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, selectedCat]);
 
-  const handleSearchSubmit = (e, selectedTerm) => {
+  const handleSearchSubmit = (e, termOverride) => {
     if (e) e.preventDefault();
-    const termToSearch = selectedTerm || searchTerm;
-    if (termToSearch.trim()) {
-      navigate(`/search?q=${encodeURIComponent(termToSearch.trim())}`);
+    const term = termOverride || searchTerm;
+    if (term.trim()) {
+      const catParam =
+        selectedCat !== "All"
+          ? `&category=${encodeURIComponent(selectedCat)}`
+          : "";
+      navigate(`/search?q=${encodeURIComponent(term.trim())}${catParam}`);
       setShowSuggestions(false);
-      setIsMobileMenuOpen(false);
-      inputRef.current?.blur();
     }
-  };
-
-  const handleLogout = () => {
-    logout();
-    setIsMobileMenuOpen(false);
-    navigate("/");
   };
 
   return (
-    <div className="shadow-md sticky top-0 z-30 bg-white">
-      <div className="container mx-auto h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6">
-        {/* Left: Logo */}
-        <Link to="/" className="shrink-0 z-50">
-          <img className="h-10 sm:h-14 w-auto" src={logo} alt="Home" />
-        </Link>
-
-        {/* Center: Search Bar */}
-        <div className="relative flex-1 max-w-md mx-2 md:mx-6" ref={searchRef}>
-          <form
-            onSubmit={handleSearchSubmit}
-            className="flex items-center border-2 border-blue-500 rounded-lg overflow-hidden bg-white"
-          >
-            <input
-              ref={inputRef}
-              className="h-10 w-full px-3 outline-none text-sm"
-              type="text"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setShowSuggestions(true);
-              }}
-            />
-            <button
-              type="submit"
-              className="bg-blue-500 h-10 px-3 text-white transition-colors hover:bg-blue-600"
-            >
-              <Search size={20} />
-            </button>
-          </form>
-
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 w-full bg-white shadow-xl border mt-1 z-50 rounded-b-lg overflow-hidden">
-              {suggestions.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => handleSearchSubmit(null, p.title)}
-                  className="p-3 border-b flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-                >
-                  <img
-                    src={`/image/${p.category}/${p.image}`}
-                    className="w-8 h-8 object-contain"
-                    alt=""
-                  />
-                  <span className="text-sm truncate">{p.title}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Right Actions */}
-        <ul className="flex items-center gap-3 sm:gap-6 text-gray-700">
-          <li className="hidden lg:block">
-            <MegaMenu />
-          </li>
-
-          {/* User Desktop */}
-          <li className="relative group hidden sm:block">
-            <div
-              className="cursor-pointer py-2"
-              onClick={!user ? openLogin : undefined}
-            >
-              {user ? (
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              ) : (
-                <User size={24} />
-              )}
-            </div>
-            {user && (
-              <div className="absolute right-0 top-full bg-white shadow-xl rounded-lg border w-48 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all p-2 z-50">
-                <Link
-                  to="/UserProfile"
-                  className="block p-2 hover:bg-gray-100 rounded text-sm font-medium"
-                >
-                  My Profile
-                </Link>
-                <Link
-                  to="/seller-dashboard"
-                  className="block p-2 hover:bg-gray-100 rounded text-sm font-medium"
-                >
-                  Seller Dashboard
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left p-2 hover:bg-red-50 text-red-600 rounded text-sm flex items-center gap-2 border-t mt-1"
-                >
-                  <LogOut size={16} /> Log Out
-                </button>
-              </div>
-            )}
-          </li>
-
-          {/* Cart Icon */}
-          <li
-            className="relative cursor-pointer hover:text-blue-600 transition"
-            onClick={openCart}
-          >
-            <ShoppingCart
-              size={24}
-              className={isEmpty ? "" : "text-blue-600"}
-            />
-            {!isEmpty && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center border-2 border-white font-bold">
-                {cart.length}
-              </span>
-            )}
-          </li>
-
-          {/* THE SELL BUTTON (Desktop) */}
-          <Link
-            to="/AddSellProduct"
-            className="hidden md:flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-full font-bold hover:scale-105 transition-all text-sm shrink-0"
-          >
-            Sell
+    <>
+      <header className="sticky top-0 z-[100] bg-white border-b border-gray-100 shadow-sm">
+        {/* --- 1. Main Navigation Row --- */}
+        <div className="max-w-[1440px] mx-auto px-4 py-3 md:py-0 md:h-20 flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
+          {/* Logo - Always stays at top left */}
+          <Link to="/" className="flex-shrink-0 order-1">
+            <img className="h-14 md:h-18 w-auto" src={logo} alt="Logo" />
           </Link>
 
-          {/* Mobile Toggle */}
-          <li
-            className="lg:hidden cursor-pointer z-50"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          {/* Search Bar - Full width on mobile (order 3), inline on desktop (order 2) */}
+          <div
+            className="w-full md:flex-1 md:max-w-2xl relative order-3 md:order-2"
+            ref={searchContainerRef}
           >
-            {isMobileMenuOpen ? (
-              <X size={28} className="text-blue-600" />
-            ) : (
-              <Menu size={28} />
-            )}
-          </li>
-        </ul>
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex items-center w-full bg-gray-100 rounded-lg overflow-hidden border-2 border-transparent focus-within:border-indigo-600 focus-within:bg-white transition-all shadow-sm"
+            >
+              <select
+                className="hidden sm:block bg-gray-200 text-[11px] rounded-lg font-bold text-gray-600 px-3 py-3 outline-none cursor-pointer hover:bg-gray-300 border-r border-gray-200"
+                value={selectedCat}
+                onChange={(e) => setSelectedCat(e.target.value)}
+              >
+                <option className="bg-gray-100" value="All">
+                  All
+                </option>
+                {dynamicCategories.map((cat) => (
+                  <option className="bg-gray-100" key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
 
-        {/* --- MOBILE SIDEBAR DRAWER --- */}
-        <div
-          className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
+              <input
+                className="flex-1 bg-transparent text-[16px] md:text-sm px-3 md:px-4 py-2 md:py-2.5 outline-none min-w-0"
+                placeholder="Search..."
+                value={searchTerm}
+                onFocus={() => setShowSuggestions(true)}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
 
-        <div
-          className={`fixed top-0 right-0 h-full w-70 bg-white z-40 shadow-2xl transform transition-transform duration-300 lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
-        >
-          <div className="flex flex-col h-full pt-20 px-6">
-            {user ? (
-              <div className="bg-gray-50 p-4 rounded-xl flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="overflow-hidden">
-                  <p className="font-bold text-sm truncate">{user.name}</p>
-                  <p className="text-[10px] text-gray-500 truncate">
-                    {user.email}
-                  </p>
-                </div>
+              <button
+                type="submit"
+                className="bg-indigo-600 text-white p-2.5 md:p-3 hover:bg-indigo-700 transition-colors shrink-0"
+              >
+                <Search size={18} className="md:w-5 md:h-5" />
+              </button>
+            </form>
+
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-[110] max-h-[60vh] overflow-y-auto">
+                {suggestions.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => handleSearchSubmit(null, p.title)}
+                    className="px-4 py-3 hover:bg-indigo-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 last:border-0"
+                  >
+                    <img
+                      src={
+                        p.image?.startsWith("data:")
+                          ? p.image
+                          : `/image/${p.category}/${p.image}`
+                      }
+                      className="w-8 h-8 md:w-10 md:h-10 object-contain shrink-0"
+                      alt={p.title}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">
+                        {p.title}
+                      </p>
+                      <p className="text-[10px] text-gray-400 uppercase font-bold">
+                        {p.category}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <button
-                onClick={() => {
-                  openLogin();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mb-6"
-              >
-                Login
-              </button>
             )}
+          </div>
 
-            <nav className="space-y-4 flex-1">
-              {/* SELL BUTTON (Inside Mobile Menu) */}
-              <Link
-                to="/AddSellProduct"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 text-lg font-bold text-blue-600 py-2 border-b"
-              >
-                <Package size={20} /> Sell a Product
-              </Link>
+          {/* User Actions - Stays at top right */}
+          <div className="flex items-center gap-1 sm:gap-3 order-2 md:order-3">
+            <Link
+              to="/wishlist"
+              className="hidden sm:flex p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+            >
+              <Heart size={22} />
+            </Link>
 
-              <Link
-                to="/UserProfile"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block text-lg font-semibold py-2 border-b"
-              >
-                Profile
-              </Link>
+            <div
+              onClick={!user ? openLogin : undefined}
+              className="relative group p-1 md:p-2 text-gray-600 hover:bg-gray-100 rounded-full cursor-pointer flex items-center gap-2"
+            >
+              <User size={22} />
+              <div className="hidden lg:block text-left">
+                <p className="text-[10px] text-gray-400 leading-none">
+                  Hello, {user ? user.name.split(" ")[0] : "Sign in"}
+                </p>
+                <p className="text-xs font-bold text-gray-800 flex items-center">
+                  Account <ChevronDown size={12} />
+                </p>
+              </div>
 
-              <button
-                onClick={() => setIsMobileCategoryOpen(!isMobileCategoryOpen)}
-                className="flex justify-between items-center w-full text-lg font-semibold py-2 border-b"
-              >
-                Categories{" "}
-                {isMobileCategoryOpen ? <ChevronDown /> : <ChevronRight />}
-              </button>
-
-              {isMobileCategoryOpen && (
-                <div className="pl-4 space-y-2 max-h-40 overflow-y-auto">
-                  {categories.map((cat) => (
+              {/* User Dropdown */}
+              {user && (
+                <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <div className="bg-white rounded-xl shadow-2xl border border-gray-100 w-52 overflow-hidden">
+                    <div className="p-4 bg-gray-50 border-b border-gray-100">
+                      <p className="text-sm font-bold truncate">{user.name}</p>
+                    </div>
                     <Link
-                      key={cat}
-                      to={`/category/${cat}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block text-gray-500 capitalize py-1"
+                      to="/UserProfile"
+                      className="block px-4 py-3 text-sm hover:bg-gray-50"
                     >
-                      {cat}
+                      My Profile
                     </Link>
-                  ))}
+                    <Link
+                      to="/seller-dashboard"
+                      className="block px-4 py-3 text-sm hover:bg-gray-50"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-bold border-t"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               )}
-            </nav>
+            </div>
 
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="mb-10 flex items-center gap-3 text-red-600 font-bold py-4 border-t"
+            <div
+              onClick={openCart}
+              className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full cursor-pointer"
+            >
+              <ShoppingCart size={22} />
+              {cart?.length > 0 && (
+                <span className="absolute top-0 right-0 h-4 w-4 md:h-5 md:w-5 flex items-center justify-center rounded-full text-[9px] md:text-[10px] font-bold text-white bg-indigo-600 ring-2 ring-white">
+                  {cart.length}
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-1.5 text-gray-600"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
+        </div>
+
+        {/* --- 2. Amazon-style Category Bar --- */}
+        <div className="bg-slate-900 text-white text-[11px] font-bold">
+          <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-4 py-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="flex items-center gap-1 hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
+            >
+              <Menu size={14} /> All
+            </button>
+            <Link
+              to="/shop"
+              className="hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
+            >
+              Best Sellers
+            </Link>
+            <Link
+              to="/deals"
+              className="hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
+            >
+              Today's Deals
+            </Link>
+            {dynamicCategories.slice(0, 5).map((cat) => (
+              <Link
+                key={cat}
+                to={`/category/${cat}`}
+                className="hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0 capitalize"
               >
-                <LogOut size={20} /> Logout
+                {cat}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* --- Mobile Sidebar (Cleaned) --- */}
+      <div
+        className={`fixed inset-0 bg-black/60 z-[100] transition-opacity ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+      <div
+        className={`fixed top-0 left-0 h-full w-[300px] bg-white z-[101] transform transition-transform duration-300 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
+        <div className="bg-slate-800 text-white p-5 flex items-center gap-3">
+          <User size={24} />
+          <p className="font-bold text-lg">
+            Hello, {user ? user.name : "Sign In"}
+          </p>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="ml-auto"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-4">
+          <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">
+            Shop By Category
+          </h3>
+          <div className="space-y-2">
+            {dynamicCategories.map((cat) => (
+              <Link
+                key={cat}
+                to={`/category/${cat}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg text-sm font-medium capitalize"
+              >
+                {cat} <ChevronRight size={16} />
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <Link
+              to="/UserProfile"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-2 text-sm text-gray-600"
+            >
+              Your Account
+            </Link>
+            <Link
+              to="/orders"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-2 text-sm text-gray-600"
+            >
+              Returns & Orders
+            </Link>
+
+            {!user ? (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openLogin();
+                }}
+                className="w-full mt-4 bg-indigo-600 text-white py-3 rounded-lg font-bold"
+              >
+                Sign In
+              </button>
+            ) : (
+              <button
+                onClick={logout}
+                className="w-full mt-4 text-red-600 py-3 font-bold border border-red-100 rounded-lg"
+              >
+                Sign Out
               </button>
             )}
           </div>
         </div>
-
-        {/* Modals */}
-        {isCartOpen && <Cart setIsOpenCart={closeCart} />}
-        {isLoginOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={closeLogin}
-            />
-            <div className="relative w-full max-w-md">
-              <LogIn onClose={closeLogin} />
-            </div>
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* --- Modals --- */}
+      {isCartOpen && <Cart setIsOpenCart={closeCart} />}
+      {isLoginOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <LogIn onClose={closeLogin} />
+        </div>
+      )}
+    </>
   );
 };
 

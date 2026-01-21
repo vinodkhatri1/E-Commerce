@@ -33,12 +33,12 @@ const Cart = ({ setIsOpenCart }) => {
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/60 z-100 backdrop-blur-sm transition-opacity"
         onClick={() => setIsOpenCart(false)}
       />
 
       {/* Main Cart Drawer */}
-      <div className="fixed top-0 right-0 z-50 w-full sm:w-112.5 h-screen bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
+      <div className="fixed top-0 right-0 z-110 w-full sm:w-112.5 h-screen bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
         {/* Header */}
         <div className="h-20 flex justify-between items-center px-8 border-b border-gray-100">
           <div>
