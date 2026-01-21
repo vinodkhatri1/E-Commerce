@@ -253,6 +253,15 @@ const allCountries = [
 
     <nav className="space-y-2 flex-1">
       <TabButton
+  active={activeTab === "home"}
+  onClick={() => {
+    window.location.href = "/";
+  }}
+  icon={<LayoutDashboard size={20} />}
+  label="Home"
+/>
+
+      <TabButton
         active={activeTab === "dashboard"}
         onClick={() => {
           setActiveTab("dashboard");
@@ -537,7 +546,7 @@ const allCountries = [
     {/* ===== DESKTOP TABLE ===== */}
     <div className="hidden md:block">
       <table className="w-full text-left">
-        <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 ">
+        <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 border-b">
           <tr>
             <th className="p-4">Image</th>
             <th className="p-4">Product Info</th>
