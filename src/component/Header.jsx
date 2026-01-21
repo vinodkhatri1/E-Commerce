@@ -73,11 +73,11 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-[100] bg-white border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-100 bg-white border-b border-gray-100 shadow-sm">
         {/* --- 1. Main Navigation Row --- */}
-        <div className="max-w-[1440px] mx-auto px-4 py-3 md:py-0 md:h-20 flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
+        <div className="max-w-360 mx-auto px-4 py-3 md:py-0 md:h-20 flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
           {/* Logo - Always stays at top left */}
-          <Link to="/" className="flex-shrink-0 order-1">
+          <Link to="/" className="shrink-0 order-1">
             <img className="h-14 md:h-18 w-auto" src={logo} alt="Logo" />
           </Link>
 
@@ -123,7 +123,7 @@ const Header = () => {
 
             {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-[110] max-h-[60vh] overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-110 max-h-[60vh] overflow-y-auto">
                 {suggestions.map((p) => (
                   <div
                     key={p.id}
@@ -229,22 +229,22 @@ const Header = () => {
 
         {/* --- 2. Amazon-style Category Bar --- */}
         <div className="bg-slate-900 text-white text-[11px] font-bold">
-          <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-4 py-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+          <div className="max-w-360 mx-auto px-4 flex items-center gap-4 py-2 overflow-x-auto no-scrollbar whitespace-nowrap">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="flex items-center gap-1 hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
+              className="flex items-center gap-1 hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
             >
               <Menu size={14} /> All
             </button>
             <Link
               to="/shop"
-              className="hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
+              className="hover:outline hover:outline-white px-2 py-1 shrink-0"
             >
               Best Sellers
             </Link>
             <Link
               to="/deals"
-              className="hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0"
+              className="hover:outline hover:outline-white px-2 py-1 shrink-0"
             >
               Today's Deals
             </Link>
@@ -252,7 +252,7 @@ const Header = () => {
               <Link
                 key={cat}
                 to={`/category/${cat}`}
-                className="hover:outline hover:outline-1 hover:outline-white px-2 py-1 shrink-0 capitalize"
+                className="hover:outline hover:outline-white px-2 py-1 shrink-0 capitalize"
               >
                 {cat}
               </Link>
@@ -263,11 +263,11 @@ const Header = () => {
 
       {/* --- Mobile Sidebar (Cleaned) --- */}
       <div
-        className={`fixed inset-0 bg-black/60 z-[100] transition-opacity ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 bg-black/60 z-100 transition-opacity ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsMobileMenuOpen(false)}
       />
       <div
-        className={`fixed top-0 left-0 h-full w-[300px] bg-white z-[101] transform transition-transform duration-300 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-75 bg-white z-101 transform transition-transform duration-300 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="bg-slate-800 text-white p-5 flex items-center gap-3">
           <User size={24} />
@@ -340,7 +340,7 @@ const Header = () => {
       {/* --- Modals --- */}
       {isCartOpen && <Cart setIsOpenCart={closeCart} />}
       {isLoginOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <LogIn onClose={closeLogin} />
         </div>
       )}
