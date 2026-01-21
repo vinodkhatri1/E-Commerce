@@ -14,26 +14,18 @@ import {
   Save,
   Tag,
 } from "lucide-react";
+
 import {
-  ResponsiveContainer, AreaChart, Area, Tooltip, LineChart, Line,
-  XAxis, YAxis, CartesianGrid,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  Tooltip,
+  BarChart,
+  Bar,
 } from "recharts";
 
-const dummyChartData = [
-  { name: 'Jan', value: 400 }, { name: 'Feb', value: 600 },
-  { name: 'Mar', value: 300 }, { name: 'Apr', value: 500 },
-  { name: 'May', value: 550 }, { name: 'Jun', value: 400 },
-  { name: 'Jul', value: 350 }, { name: 'Aug', value: 450 },
-  { name: 'Sep', value: 650 }, { name: 'Oct', value: 380 },
-  { name: 'Nov', value: 500 }, { name: 'Dec', value: 100 },
-];
-
-const dummyBarData = [
-  { name: 'Jan', val: 40 }, { name: 'Feb', val: 80 },
-  { name: 'Mar', val: 30 }, { name: 'Apr', val: 50 },
-  { name: 'May', val: 90 }, { name: 'Jun', val: 70 },
-  { name: 'Jul', val: 20 }, { name: 'Aug', val: 60 },
-];
 
 const SellerDashboard = () => {
   const {
@@ -46,9 +38,12 @@ const SellerDashboard = () => {
   } = useProducts();
 
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
+  const [showAllCountries, setShowAllCountries] = useState(false);
+  // 1️⃣ STATE (TOP OF COMPONENT KE ANDAR)
+const [mobileOpen, setMobileOpen] = useState(false);
+
 
   // 1. AUTO-DISCOUNT STATE
   const [pricing, setPricing] = useState({
@@ -93,7 +88,10 @@ const SellerDashboard = () => {
 
   // 3. ANALYTICS
   const analytics = useMemo(() => {
-    const totalVal = products.reduce((sum, p) => sum + Number(p.price) * (Number(p.stock) || 1), 0);
+    const totalVal = products.reduce(
+      (sum, p) => sum + Number(p.price) * Number(p.stock),
+      0,
+    );
     const lowStockCount = products.filter((p) => p.stock < 10).length;
     const avgPrice = products.length
       ? products.reduce((sum, p) => sum + Number(p.price), 0) / products.length
@@ -112,6 +110,33 @@ const SellerDashboard = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  const dummyChartData = [
+  { name: 'Jan', value: 400 }, { name: 'Feb', value: 600 },
+  { name: 'Mar', value: 300 }, { name: 'Apr', value: 500 },
+  { name: 'May', value: 550 }, { name: 'Jun', value: 400 },
+  { name: 'Jul', value: 350 }, { name: 'Aug', value: 450 },
+  { name: 'Sep', value: 650 }, { name: 'Oct', value: 380 },
+  { name: 'Nov', value: 500 }, { name: 'Dec', value: 100 },
+];
+
+const dummyBarData = [
+  { name: 'Jan', val: 40 }, { name: 'Feb', val: 80 },
+  { name: 'Mar', val: 30 }, { name: 'Apr', val: 50 },
+  { name: 'May', val: 90 }, { name: 'Jun', val: 70 },
+  { name: 'Jul', val: 20 }, { name: 'Aug', val: 60 },
+];
+
+const allCountries = [
+  { name: 'Turkey', sales: '6,972', trend: 'up' },
+  { name: 'Belgium', sales: '6,972', trend: 'up' },
+  { name: 'Sweden', sales: '4,972', trend: 'down' },
+  { name: 'Vietnam', sales: '6,972', trend: 'up' },
+  { name: 'Australia', sales: '6,972', trend: 'down' },
+  { name: 'Saudi Arabia', sales: '6,972', trend: 'down' },
+  { name: 'Italy', sales: '5,120', trend: 'up' },
+  { name: 'Canada', sales: '4,890', trend: 'up' },
+];
 
   // 5. FORM SUBMIT WITH DEBUGGING
   const handleFormSubmit = (e) => {
@@ -146,69 +171,150 @@ const SellerDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fcfcfd] text-slate-900 font-sans">
+    <div className="flex min-h-screen bg-[#fcfcfd] text-slate-900 font-sans pb-20 md:pb-0">
       {/* SIDEBAR */}
-      <aside
-        className={`fixed md:static inset-y-0 left-0 w-72 bg-white border-r border-slate-200 z-50 transform transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 flex flex-col p-6`}
-      >
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-            <Layers className="text-white" size={22} />
-          </div>
-          <h2 className="text-xl font-black tracking-tighter text-blue-600 uppercase">Seller Hub</h2>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden ml-auto"><X size={20} /></button>
-        </div>
 
-        <nav className="space-y-2 flex-1">
-          <TabButton
-            active={activeTab === "dashboard"}
-            onClick={() => setActiveTab("dashboard")}
-            icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
-          />
-          <TabButton
-            active={activeTab === "products"}
-            onClick={() => setActiveTab("products")}
-            icon={<Package size={20} />}
-            label="Inventory"
-          />
-          <TabButton
-            active={activeTab === "add"}
-            onClick={() => {
-              setEditItem(null);
-              setActiveTab("add");
-            }}
-            icon={<PlusCircle size={20} />}
-            label={editItem ? "Editing..." : "Add Product"}
-          />
-        </nav>
-        <button
-          onClick={resetData}
-          className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2 transition-colors mt-auto"
-        >
-          <RotateCcw size={14} /> Reset All Data
-        </button>
-      </aside>
+      {/* DESKTOP SIDEBAR */}
+<aside className="hidden md:flex w-64 bg-white border-r fixed h-full p-6 flex-col z-30">
+  <h2 className="text-xl font-black mb-10 text-blue-600 tracking-tighter uppercase">
+    Seller Hub
+  </h2>
 
-      <main className="flex-1 md:ml-64 p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-black capitalize tracking-tight">
-            {activeTab}
-          </h1>
-          <p className="text-slate-400 text-sm font-bold tracking-tight">
-            Managing {products.length} Items
-          </p>
-        </header>
+  <nav className="space-y-2 flex-1">
+    <TabButton
+      active={activeTab === "dashboard"}
+      onClick={() => setActiveTab("dashboard")}
+      icon={<LayoutDashboard size={20} />}
+      label="Dashboard"
+    />
 
-        {/* --- VIEWS --- */}
-        {/* --- DASHBOARD VIEW UPDATED --- */}
-{activeTab === "dashboard" && (
-  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+    <TabButton
+      active={activeTab === "products"}
+      onClick={() => setActiveTab("products")}
+      icon={<Package size={20} />}
+      label="Inventory"
+    />
+
+    <TabButton
+      active={activeTab === "add"}
+      onClick={() => {
+        setEditItem(null);
+        setActiveTab("add");
+      }}
+      icon={<PlusCircle size={20} />}
+      label={editItem ? "Editing..." : "Add Product"}
+    />
+  </nav>
+
+  <button
+    onClick={resetData}
+    className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2 mt-auto"
+  >
+    <RotateCcw size={14} /> Reset All Data
+  </button>
+</aside>
+
     
+{/* MOBILE HEADER */}
+<div className="md:hidden fixed top-0 inset-x-0 z-40 bg-white border-b px-4 py-3 flex items-center justify-between">
+  <button
+    onClick={() => setMobileOpen(true)}
+    className="p-2 rounded-lg hover:bg-slate-100"
+  >
+    <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 6h16M3 12h16M3 18h16" />
+    </svg>
+  </button>
+  <span className="font-black text-blue-600 uppercase">Seller Hub</span>
+</div>
+
+{/* OVERLAY */}
+<div
+  className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-300 ${
+    mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+  }`}
+  onClick={() => setMobileOpen(false)}
+/>
+
+{/* MOBILE SLIDE DRAWER */}
+<aside
+  className={`
+    fixed top-0 left-0 z-50 h-full w-64 bg-white border-r
+    transform transition-transform duration-300 ease-in-out
+    md:hidden
+    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+  `}
+>
+  <div className="p-6 flex flex-col h-full">
+    <div className="flex items-center justify-between mb-8">
+      <h2 className="text-xl font-black text-blue-600 uppercase">Seller Hub</h2>
+      <button onClick={() => setMobileOpen(false)} className="p-2">✕</button>
+    </div>
+
+    <nav className="space-y-2 flex-1">
+      <TabButton
+        active={activeTab === "dashboard"}
+        onClick={() => {
+          setActiveTab("dashboard");
+          setMobileOpen(false);
+        }}
+        icon={<LayoutDashboard size={20} />}
+        label="Dashboard"
+      />
+      <TabButton
+        active={activeTab === "products"}
+        onClick={() => {
+          setActiveTab("products");
+          setMobileOpen(false);
+        }}
+        icon={<Package size={20} />}
+        label="Inventory"
+      />
+      <TabButton
+        active={activeTab === "add"}
+        onClick={() => {
+          setEditItem(null);
+          setActiveTab("add");
+          setMobileOpen(false);
+        }}
+        icon={<PlusCircle size={20} />}
+        label={editItem ? "Editing..." : "Add Product"}
+      />
+    </nav>
+
+    <button
+      onClick={resetData}
+      className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2 mt-auto"
+    >
+      <RotateCcw size={14} /> Reset All Data
+    </button>
+  </div>
+</aside>
+
+{/* MAIN OFFSET */}
+<main className="flex-1 md:ml-64 pt-16 md:pt-0">
+
+  <header className="mb-6 sm:mb-8">
+    <h1 className="
+      text-2xl sm:text-3xl 
+      font-black 
+      capitalize 
+      tracking-tight">
+      {activeTab}
+    </h1>
+
+    <p className="text-slate-400 text-xs sm:text-sm font-bold tracking-tight">
+      Managing {products.length} Items
+    </p>
+  </header>
+
+
+       {/* --- DASHBOARD VIEW UPDATED --- */}
+{activeTab === "dashboard" && (
+  <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4">
+
     {/* 1. TOP STAT CARDS */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       <StatCard
         label="Total Stock Value"
         val={`$${analytics.totalVal.toLocaleString()}`}
@@ -229,52 +335,79 @@ const SellerDashboard = () => {
       />
     </div>
 
-    {/* 2. RECENT ORDER AREA CHART (Similar to Capture.PNG) */}
-    <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
-      <div className="flex justify-between items-center mb-6 px-2">
-        <h3 className="font-black text-lg">Recent Order</h3>
+    {/* 2. RECENT ORDER AREA CHART */}
+    <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+      <div className="flex justify-between items-center mb-4 sm:mb-6 px-1 sm:px-2">
+        <h3 className="font-black text-base sm:text-lg">Recent Order</h3>
         <button className="text-slate-400 font-bold">...</button>
       </div>
-      <div className="h-64 w-full">
+
+      <div className="h-52 sm:h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={dummyChartData}>
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold', fill: '#94a3b8'}} />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }}
+            />
             <Tooltip />
-            <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorValue)"
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>
 
-    {/* 3. MIDDLE SECTION: TOP PRODUCTS & TOP COUNTRIES (Similar to Capture1.PNG) */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {/* 3. MIDDLE SECTION */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+
       {/* Top Products */}
-      <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="font-black text-lg">Top Products</h3>
-          <button className="text-blue-600 text-xs font-bold">View all</button>
+      <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h3 className="font-black text-base sm:text-lg">Top Products</h3>
+          <button
+            onClick={() => setActiveTab("products")}
+            className="text-blue-600 text-xs font-bold hover:underline"
+          >
+            View all
+          </button>
         </div>
+
         <div className="space-y-4">
           {products.slice(0, 4).map((p, i) => (
-            <div key={i} className="flex items-center justify-between group">
-              <div className="flex items-center gap-3">
-                <img src={p.image?.startsWith("data:") ? p.image : `/image/${p.category}/${p.image}`} 
-                     className="w-10 h-10 rounded-xl bg-slate-100 object-cover" 
-                     onError={(e) => (e.target.src = "https://placehold.co/100")} />
-                <div>
-                  <p className="text-sm font-bold truncate w-32">{p.title}</p>
+            <div key={i} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={p.image?.startsWith("data:") ? p.image : `/image/${p.category}/${p.image}`}
+                  className="w-10 h-10 rounded-xl bg-slate-100 object-cover flex-shrink-0"
+                  onError={(e) => (e.target.src = "https://placehold.co/100")}
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-bold truncate max-w-[140px] sm:max-w-none">
+                    {p.title}
+                  </p>
                   <p className="text-[10px] text-slate-400 font-bold">100 Items</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-[10px] text-slate-400 font-black uppercase">Coupon Code</p>
+
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] text-slate-400 font-black uppercase">
+                  Coupon Code
+                </p>
                 <p className="text-sm font-black">Sflat</p>
               </div>
             </div>
@@ -282,340 +415,405 @@ const SellerDashboard = () => {
         </div>
       </div>
 
-      {/* Top Countries by Sales */}
-      <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+      {/* Top Countries */}
+      <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-black text-lg">Top Countries By Sales</h3>
-          <button className="text-blue-600 text-xs font-bold">View all</button>
+          <h3 className="font-black text-base sm:text-lg">Top Countries By Sales</h3>
+          <button
+            onClick={() => setShowAllCountries(!showAllCountries)}
+            className="text-blue-600 text-xs font-bold px-3 py-1 rounded-full hover:bg-blue-50"
+          >
+            {showAllCountries ? "Show Less" : "View all"}
+          </button>
         </div>
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-2xl font-black">$37,802</span>
-          <span className="text-green-500 flex items-center text-xs font-bold"><TrendingUp size={14}/> 1.56%</span>
+
+        <div className="flex items-center gap-2 mb-4 sm:mb-6">
+          <span className="text-xl sm:text-2xl font-black">$37,802</span>
+          <span className="text-green-500 flex items-center text-xs font-bold">
+            <TrendingUp size={14} /> 1.56%
+          </span>
         </div>
-        <div className="space-y-4">
-          {['Turkey', 'Belgium', 'Sweden', 'Vietnam'].map((country, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-slate-100 overflow-hidden">
-                   {/* Flag placeholder */}
-                   <div className={`w-full h-full bg-blue-${(i+1)*100}`}></div>
+
+        <div
+          className={`space-y-4 overflow-hidden transition-all duration-500 ${
+            showAllCountries ? "max-h-[1000px]" : "max-h-[260px]"
+          }`}
+        >
+          {(showAllCountries ? allCountries : allCountries.slice(0, 4)).map(
+            (country, i) => (
+              <div key={i} className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold">
+                    {country.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-bold text-slate-600">
+                    {country.name}
+                  </span>
                 </div>
-                <span className="text-sm font-bold text-slate-600">{country}</span>
+
+                <div className="flex items-center gap-6">
+                  {country.trend === "up" ? (
+                    <TrendingUp size={16} className="text-green-400 opacity-50" />
+                  ) : (
+                    <TrendingUp size={16} className="text-red-400 rotate-180 opacity-50" />
+                  )}
+                  <span className="text-sm font-black text-slate-700 w-12 text-right">
+                    {country.sales}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-10">
-                 <div className={`h-1 w-12 rounded-full ${i % 2 === 0 ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                 <span className="text-sm font-black text-slate-700">6,972</span>
-              </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
     </div>
 
-    {/* 4. BOTTOM SECTION: RECENT ORDERS & EARNINGS (Similar to Capture2.PNG) */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-       {/* Orders List */}
-       <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-black text-lg">Orders</h3>
-            <button className="text-slate-400">...</button>
-          </div>
-          <div className="space-y-5">
-            {products.slice(0, 5).map((p, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img src={p.image?.startsWith("data:") ? p.image : `/image/${p.category}/${p.image}`} className="w-10 h-10 rounded-xl object-cover border border-slate-50" onError={(e) => (e.target.src = "https://placehold.co/100")}/>
-                  <span className="text-sm font-bold text-slate-600 truncate w-40">{p.title}</span>
-                </div>
-                <span className="text-xs font-bold text-slate-400">20 Nov 2023</span>
-              </div>
-            ))}
-          </div>
-       </div>
+    {/* 4. BOTTOM SECTION */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* Orders */}
+      <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h3 className="font-black text-base sm:text-lg">Orders</h3>
+          <button className="text-slate-400">...</button>
+        </div>
 
-       {/* Earnings Bar Chart */}
-       <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-black text-lg">Earnings</h3>
-            <button className="text-slate-400">...</button>
+        <div className="space-y-4">
+          {products.slice(0, 5).map((p, i) => (
+            <div key={i} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={p.image?.startsWith("data:") ? p.image : `/image/${p.category}/${p.image}`}
+                  className="w-10 h-10 rounded-xl object-cover"
+                />
+                <span className="text-sm font-bold text-slate-600 truncate max-w-[160px]">
+                  {p.title}
+                </span>
+              </div>
+              <span className="text-xs font-bold text-slate-400 whitespace-nowrap">
+                20 Nov 2023
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Earnings */}
+      <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-black text-base sm:text-lg">Earnings</h3>
+          <button className="text-slate-400">...</button>
+        </div>
+
+        <div className="space-y-2 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-blue-600 rounded-full" />
+            <span className="text-xs font-bold text-slate-400">Revenue</span>
           </div>
-          <div className="space-y-2 mb-6">
-             <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                <span className="text-xs font-bold text-slate-400">Revenue</span>
-             </div>
-             <div className="flex items-center gap-2">
-                <span className="text-2xl font-black">$37,802</span>
-                <span className="text-green-500 text-xs font-bold flex items-center"><TrendingUp size={12}/> 0.56%</span>
-             </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl sm:text-2xl font-black">$37,802</span>
+            <span className="text-green-500 text-xs font-bold flex items-center">
+              <TrendingUp size={12} /> 0.56%
+            </span>
           </div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={dummyBarData}>
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold'}} />
-                  <Bar dataKey="val" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={15} />
-               </BarChart>
-            </ResponsiveContainer>
-          </div>
-       </div>
+        </div>
+
+        <div className="h-40 sm:h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={dummyBarData}>
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+              <Bar dataKey="val" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={14} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   </div>
 )}
 
+
         {activeTab === "products" && (
-          <div className="bg-white rounded-3xl border shadow-sm overflow-hidden animate-in fade-in">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 border-b">
-                <tr>
-                  <th className="p-4">Image</th>
-                  <th className="p-4">Product Info</th>
-                  <th className="p-4">Pricing</th>
-                  <th className="p-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {products.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-slate-50 transition group"
-                  >
-                    <td className="p-4 w-20">
-                      <img
-                        src={
-                          product.image?.startsWith("data:")
-                            ? product.image
-                            : `/image/${product.category}/${product.image}`
-                        }
-                        className="w-12 h-12 rounded-xl object-cover bg-slate-100"
-                        onError={(e) =>
-                          (e.target.src = "https://placehold.co/100")
-                        }
-                      />
-                    </td>
-                    <td className="p-4">
-                      <p className="font-bold text-sm">{product.title}</p>
-                      <p className="text-[10px] text-slate-400 uppercase">
-                        {product.category}
-                      </p>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-black text-sm">${product.price}</p>
-                      {product.discountPercent > 0 && (
-                        <p className="text-[10px] text-green-500 font-bold">
-                          -{product.discountPercent}%
-                        </p>
-                      )}
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            setEditItem(product);
-                            setActiveTab("add");
-                          }}
-                          className="p-2 hover:text-blue-600"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => deleteProduct(product.id)}
-                          className="p-2 hover:text-red-600"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+  <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden animate-in fade-in">
 
-        {activeTab === "add" && (
-          <div className="max-w-4xl animate-in fade-in zoom-in-95">
-            <form
-              onSubmit={handleFormSubmit}
-              className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8"
+    {/* ===== DESKTOP TABLE ===== */}
+    <div className="hidden md:block">
+      <table className="w-full text-left">
+        <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 ">
+          <tr>
+            <th className="p-4">Image</th>
+            <th className="p-4">Product Info</th>
+            <th className="p-4">Pricing</th>
+            <th className="p-4 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {products.map((product) => (
+            <tr
+              key={product.id}
+              className="hover:bg-slate-50 transition group"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Product Title"
-                  name="title"
-                  defaultValue={editItem?.title}
-                  required
+              <td className="p-4 w-20">
+                <img
+                  src={
+                    product.image?.startsWith("data:")
+                      ? product.image
+                      : `/image/${product.category}/${product.image}`
+                  }
+                  className="w-12 h-12 rounded-xl object-cover bg-slate-100"
+                  onError={(e) => (e.target.src = "https://placehold.co/100")}
                 />
-                <Input
-                  label="Brand"
-                  name="brand"
-                  defaultValue={editItem?.brand}
-                  required
-                />
-              </div>
+              </td>
 
-              {/* AUTO-DISCOUNT UI */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase px-1">
-                    Sale Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    step="0.01"
-                    value={pricing.price}
-                    onChange={handlePriceChange}
-                    className="p-3 bg-slate-50 border rounded-xl font-bold text-sm outline-none focus:ring-4 ring-blue-50 transition-all"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 relative">
-                  <label className="text-[10px] font-black text-slate-400 uppercase px-1">
-                    Original Price
-                  </label>
-                  <input
-                    type="number"
-                    name="originalPrice"
-                    step="0.01"
-                    value={pricing.originalPrice}
-                    onChange={handlePriceChange}
-                    className="p-3 bg-slate-50 border rounded-xl font-bold text-sm outline-none focus:ring-4 ring-blue-50 transition-all"
-                  />
-                  {pricing.discountPercent > 0 && (
-                    <div className="absolute -top-3 right-0 bg-green-500 text-white text-[9px] font-black px-2 py-1 rounded-lg animate-bounce flex items-center gap-1">
-                      <Tag size={8} /> {pricing.discountPercent}% OFF
-                    </div>
-                  )}
-                </div>
-                <Input
-                  label="Stock Level"
-                  name="stock"
-                  type="number"
-                  defaultValue={editItem?.stock}
-                  required
-                />
-              </div>
+              <td className="p-4">
+                <p className="font-bold text-sm">{product.title}</p>
+                <p className="text-[10px] text-slate-400 uppercase">
+                  {product.category}
+                </p>
+              </td>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase px-1">
-                    Category
-                  </label>
-                  <select
-                    name="category"
-                    defaultValue={editItem?.category}
-                    className="p-3 bg-slate-50 border rounded-xl font-bold text-sm h-[52px]"
+              <td className="p-4">
+                <p className="font-black text-sm">${product.price}</p>
+                {product.discountPercent > 0 && (
+                  <p className="text-[10px] text-green-500 font-bold">
+                    -{product.discountPercent}%
+                  </p>
+                )}
+              </td>
+
+              <td className="p-4 text-right">
+                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => {
+                      setEditItem(product);
+                      setActiveTab("add");
+                    }}
+                    className="p-2 hover:text-blue-600"
                   >
-                    {categories.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => deleteProduct(product.id)}
+                    className="p-2 hover:text-red-600"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-                <div className="md:col-span-2 flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase px-1">
-                    Short Description
-                  </label>
-                  <textarea
-                    name="description"
-                    defaultValue={editItem?.description}
-                    className="p-3 bg-slate-50 border rounded-xl font-medium text-sm h-[52px] resize-none"
-                  />
-                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {/* ===== MOBILE CARDS ===== */}
+    <div className="md:hidden divide-y">
+      {products.map((product) => (
+        <div key={product.id} className="p-4 flex gap-4">
+          <img
+            src={
+              product.image?.startsWith("data:")
+                ? product.image
+                : `/image/${product.category}/${product.image}`
+            }
+            className="w-14 h-14 rounded-xl object-cover bg-slate-100 flex-shrink-0"
+            onError={(e) => (e.target.src = "https://placehold.co/100")}
+          />
+
+          <div className="flex-1">
+            <p className="font-bold text-sm">{product.title}</p>
+            <p className="text-[10px] text-slate-400 uppercase mb-1">
+              {product.category}
+            </p>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-black text-sm">${product.price}</p>
+                {product.discountPercent > 0 && (
+                  <p className="text-[10px] text-green-500 font-bold">
+                    -{product.discountPercent}%
+                  </p>
+                )}
               </div>
 
-              {/* IMAGE UPLOAD FIX */}
-              <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200">
-                <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 bg-white rounded-xl border flex items-center justify-center overflow-hidden">
-                    {previewImage ? (
-                      <img
-                        src={
-                          previewImage.startsWith("data:")
-                            ? previewImage
-                            : `/image/${editItem?.category}/${previewImage}`
-                        }
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <ImageIcon className="text-slate-200" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="text-xs file:bg-blue-600 file:text-white file:border-0 file:rounded-full file:px-4 file:py-2 cursor-pointer"
-                    />
-                    <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase">
-                      Base64 Upload enabled for instant site preview
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 flex gap-4">
+              <div className="flex gap-2">
                 <button
-                  type="submit"
-                  className="flex-1 bg-slate-900 text-white font-black p-5 rounded-2xl hover:bg-blue-600 transition flex items-center justify-center gap-2"
-                >
-                  {editItem ? <Save size={20} /> : <PlusCircle size={20} />}
-                  {editItem ? "CONFIRM EDIT" : "PUBLISH TO STORE"}
-                </button>
-                <button
-                  type="button"
                   onClick={() => {
-                    setEditItem(null);
-                    setActiveTab("products");
+                    setEditItem(product);
+                    setActiveTab("add");
                   }}
-                  className="px-8 font-bold text-slate-400 hover:text-rose-500 transition-colors"
+                  className="p-2 text-blue-600"
                 >
-                  Discard
+                  <Edit size={16} />
                 </button>
-                <button type="button" onClick={() => setActiveTab("products")} className="px-6 font-bold text-slate-400 hover:text-slate-900 transition">Cancel</button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* DETAIL VIEW */}
-        {activeTab === "view-detail" && selectedProduct && (
-          <div className="animate-in slide-in-from-right duration-500">
-            <button onClick={() => setActiveTab("products")} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-black text-xs uppercase tracking-widest mb-8">
-              <ArrowLeft size={16} /> Back to Inventory
-            </button>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div className="bg-white rounded-[2.5rem] p-4 border shadow-sm">
-                <img 
-                  src={selectedProduct.image?.startsWith('http') ? selectedProduct.image : `/image/${selectedProduct.category}/${selectedProduct.image}`} 
-                  className="w-full h-96 object-contain bg-slate-50 rounded-4xl"
-                  onError={(e) => e.target.src = "https://placehold.co/400"}
-                />
-              </div>
-              <div className="space-y-6">
-                <span className="px-4 py-2 rounded-full bg-blue-50 text-blue-600 font-black text-[10px] uppercase">{selectedProduct.category}</span>
-                <h2 className="text-4xl font-black text-slate-900 leading-tight">{selectedProduct.title}</h2>
-                <p className="text-3xl font-black text-blue-600">${selectedProduct.price}</p>
-                <div className="flex gap-4">
-                  <div className="p-4 bg-white border rounded-2xl flex-1 text-center">
-                    <p className="text-[10px] font-black uppercase text-slate-400">Stock</p>
-                    <p className="text-xl font-black">{selectedProduct.stock} pcs</p>
-                  </div>
-                  <div className="p-4 bg-white border rounded-2xl flex-1 text-center">
-                    <p className="text-[10px] font-black uppercase text-slate-400">Rating</p>
-                    <p className="text-xl font-black flex items-center justify-center gap-1"><Star size={16} className="text-yellow-400 fill-yellow-400" /> {selectedProduct.rating || 5}.0</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 pt-6">
-                  <button onClick={() => { setEditItem(selectedProduct); setActiveTab("add"); }} className="flex-1 bg-slate-900 text-white font-bold p-4 rounded-2xl hover:bg-blue-600 transition">Edit Product</button>
-                  <button onClick={() => { deleteProduct(selectedProduct.id); setActiveTab("products"); }} className="p-4 bg-red-50 text-red-500 rounded-2xl border border-red-100 hover:bg-red-500 hover:text-white transition"><Trash2 /></button>
-                </div>
+                <button
+                  onClick={() => deleteProduct(product.id)}
+                  className="p-2 text-red-600"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      ))}
+    </div>
+
+  </div>
+)}
+
+
+        {activeTab === "add" && (
+  <div className="max-w-4xl mx-auto px-3 sm:px-4 animate-in fade-in zoom-in-95">
+    <form
+      onSubmit={handleFormSubmit}
+      className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6 sm:space-y-8"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+        <Input
+          label="Product Title"
+          name="title"
+          defaultValue={editItem?.title}
+          required
+        />
+        <Input
+          label="Brand"
+          name="brand"
+          defaultValue={editItem?.brand}
+          required
+        />
+      </div>
+
+      {/* AUTO-DISCOUNT UI */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 items-end">
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase px-1">
+            Sale Price ($)
+          </label>
+          <input
+            type="number"
+            name="price"
+            step="0.01"
+            value={pricing.price}
+            onChange={handlePriceChange}
+            className="p-3 bg-slate-50 border rounded-xl font-bold text-sm outline-none focus:ring-4 ring-blue-50 transition-all"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-1 relative">
+          <label className="text-[10px] font-black text-slate-400 uppercase px-1">
+            Original Price
+          </label>
+          <input
+            type="number"
+            name="originalPrice"
+            step="0.01"
+            value={pricing.originalPrice}
+            onChange={handlePriceChange}
+            className="p-3 bg-slate-50 border rounded-xl font-bold text-sm outline-none focus:ring-4 ring-blue-50 transition-all"
+          />
+          {pricing.discountPercent > 0 && (
+            <div className="absolute -top-3 right-0 bg-green-500 text-white text-[9px] font-black px-2 py-1 rounded-lg animate-bounce flex items-center gap-1">
+              <Tag size={8} /> {pricing.discountPercent}% OFF
+            </div>
+          )}
+        </div>
+
+        <Input
+          label="Stock Level"
+          name="stock"
+          type="number"
+          defaultValue={editItem?.stock}
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase px-1">
+            Category
+          </label>
+          <select
+            name="category"
+            defaultValue={editItem?.category}
+            className="p-3 bg-slate-50 border rounded-xl font-bold text-sm h-[52px]"
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="md:col-span-2 flex flex-col gap-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase px-1">
+            Short Description
+          </label>
+          <textarea
+            name="description"
+            defaultValue={editItem?.description}
+            className="p-3 bg-slate-50 border rounded-xl font-medium text-sm h-[72px] resize-none"
+          />
+        </div>
+      </div>
+
+      {/* IMAGE UPLOAD */}
+      <div className="bg-slate-50 p-4 sm:p-6 rounded-3xl border-2 border-dashed border-slate-200">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+          <div className="w-24 h-24 bg-white rounded-xl border flex items-center justify-center overflow-hidden">
+            {previewImage ? (
+              <img
+                src={
+                  previewImage.startsWith("data:")
+                    ? previewImage
+                    : `/image/${editItem?.category}/${previewImage}`
+                }
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <ImageIcon className="text-slate-200" />
+            )}
+          </div>
+
+          <div className="flex-1 w-full">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full text-xs file:bg-blue-600 file:text-white file:border-0 file:rounded-full file:px-4 file:py-2 cursor-pointer"
+            />
+            <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase">
+              Base64 Upload enabled for instant site preview
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="pt-2 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <button
+          type="submit"
+          className="flex-1 bg-slate-900 text-white font-black p-4 sm:p-5 rounded-2xl hover:bg-blue-600 transition flex items-center justify-center gap-2"
+        >
+          {editItem ? <Save size={20} /> : <PlusCircle size={20} />}
+          {editItem ? "CONFIRM EDIT" : "PUBLISH TO STORE"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setEditItem(null);
+            setActiveTab("products");
+          }}
+          className="sm:px-8 py-3 font-bold text-slate-400 hover:text-rose-500 transition-colors text-center"
+        >
+          Discard
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
       </main>
     </div>
   );
@@ -635,8 +833,8 @@ const StatCard = ({ label, val, icon, color }) => (
   <div className="bg-white p-6 rounded-3xl border border-slate-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
     <div className={`p-4 rounded-2xl ${color} shadow-sm`}>{icon}</div>
     <div>
-      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
-      <p className="text-2xl font-black text-slate-900">{val}</p>
+      <p className="text-[10px] font-black uppercase text-slate-400">{label}</p>
+      <p className="text-2xl font-black">{val}</p>
     </div>
   </div>
 );
