@@ -14,9 +14,12 @@ import {
   Save,
   Tag,
   Menu,
+<<<<<<< Updated upstream
   X,
   Home,
   ChevronRight,
+=======
+>>>>>>> Stashed changes
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -45,6 +48,10 @@ const SellerDashboard = () => {
   const [previewImage, setPreviewImage] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showAllCountries, setShowAllCountries] = useState(false);
+<<<<<<< Updated upstream
+=======
+  const [mobileOpen, setMobileOpen] = useState(false)
+>>>>>>> Stashed changes
 
   // --- PRICING & DISCOUNT STATE ---
   const [pricing, setPricing] = useState({
@@ -86,7 +93,16 @@ const SellerDashboard = () => {
     });
   };
 
+<<<<<<< Updated upstream
   // Analytics Calculation
+=======
+  useEffect(() => {
+  document.body.style.overflow = mobileOpen ? "hidden" : "auto";
+}, [mobileOpen]);
+
+
+  // 3. ANALYTICS
+>>>>>>> Stashed changes
   const analytics = useMemo(() => {
     const totalVal = products.reduce(
       (sum, p) => sum + Number(p.price) * Number(p.stock),
@@ -156,6 +172,7 @@ const SellerDashboard = () => {
           </h2>
         </div>
 
+<<<<<<< Updated upstream
         <nav className="space-y-1.5 flex-1">
           <TabButton
             active={activeTab === "dashboard"}
@@ -165,6 +182,209 @@ const SellerDashboard = () => {
           />
           <TabButton
             active={activeTab === "products"}
+=======
+      {/* DESKTOP SIDEBAR */}
+<aside className="hidden md:flex w-64 bg-white border-r fixed h-full p-6 flex-col z-30">
+  <h2 className="text-xl font-black mb-10 text-blue-600 tracking-tighter uppercase">
+    Seller Hub
+  </h2>
+
+  <nav className="space-y-2 flex-1">
+    <TabButton
+      active={activeTab === "dashboard"}
+      onClick={() => setActiveTab("dashboard")}
+      icon={<LayoutDashboard size={20} />}
+      label="Dashboard"
+    />
+
+    <TabButton
+      active={activeTab === "products"}
+      onClick={() => setActiveTab("products")}
+      icon={<Package size={20} />}
+      label="Inventory"
+    />
+
+    <TabButton
+      active={activeTab === "add"}
+      onClick={() => {
+        setEditItem(null);
+        setActiveTab("add");
+      }}
+      icon={<PlusCircle size={20} />}
+      label={editItem ? "Editing..." : "Add Product"}
+    />
+  </nav>
+
+  <button
+    onClick={resetData}
+    className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2 mt-auto"
+  >
+    <RotateCcw size={14} /> Reset All Data
+  </button>
+</aside>
+
+
+    
+{/* MOBILE HEADER */}
+<div className="md:hidden fixed top-0 inset-x-0 z-[9999] bg-white border-b px-4 py-3 flex items-center justify-between">
+  <button
+    onClick={() => setMobileOpen(true)}
+    className="p-2 rounded-lg hover:bg-slate-100"
+  >
+    <Menu size={24}/>
+    
+  </button>
+
+  <span className="font-black text-blue-600 uppercase">Seller Hub</span>
+</div>
+
+
+{/* OVERLAY */}
+<div
+  className={`fixed top-0 inset-x-0 bottom-0 bg-black/40 z-[9998] md:hidden
+  transition-opacity duration-300
+  ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+  onClick={() => setMobileOpen(false)}
+/>
+
+
+{/* MOBILE SLIDE DRAWER */}
+<aside
+  className={`fixed top-16 left-0 z-[9999] h-[calc(100vh-4rem)] w-64 bg-white border-r
+  transform transition-transform duration-300 ease-in-out md:hidden
+  ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+>
+
+  <div className="p-6 flex flex-col h-full">
+    <div className="flex items-center justify-between mb-8">
+      <h2 className="text-xl font-black text-blue-600 uppercase">Seller Hub</h2>
+      <button onClick={() => setMobileOpen(false)} className="p-2">✕</button>
+    </div>
+
+    <nav className="space-y-2 flex-1">
+      
+      <TabButton
+        active={activeTab === "dashboard"}
+        onClick={() => {
+          setActiveTab("dashboard");
+          setMobileOpen(false);
+        }}
+        icon={<LayoutDashboard size={20} />}
+        label="Dashboard"
+      />
+      <TabButton
+        active={activeTab === "products"}
+        onClick={() => {
+          setActiveTab("products");
+          setMobileOpen(false);
+        }}
+        icon={<Package size={20} />}
+        label="Inventory"
+      />
+      <TabButton
+        active={activeTab === "add"}
+        onClick={() => {
+          setEditItem(null);
+          setActiveTab("add");
+          setMobileOpen(false);
+        }}
+        icon={<PlusCircle size={20} />}
+        label={editItem ? "Editing..." : "Add Product"}
+      />
+    </nav>
+
+    <button
+      onClick={resetData}
+      className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2 mt-auto"
+    >
+      <RotateCcw size={14} /> Reset All Data
+    </button>
+  </div>
+</aside>
+
+{/* MAIN OFFSET */}
+<main className="flex-1 md:ml-64 pt-16 md:pt-0">
+  <header className="mb-6 sm:mb-8">
+    <h1 className="text-2xl sm:text-3xl font-black capitalize tracking-tight">
+      {activeTab}
+    </h1>
+    <p className="text-slate-400 text-xs sm:text-sm font-bold tracking-tight">
+      Managing {products.length} Items
+    </p>
+  </header>
+
+       {/* --- DASHBOARD VIEW UPDATED --- */}
+{activeTab === "dashboard" && (
+  <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4">
+
+    {/* 1. TOP STAT CARDS */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <StatCard
+        label="Total Stock Value"
+        val={`$${analytics.totalVal.toLocaleString()}`}
+        icon={<DollarSign />}
+        color="bg-green-100 text-green-600"
+      />
+      <StatCard
+        label="Critical Stock"
+        val={analytics.lowStockCount}
+        icon={<AlertTriangle />}
+        color="bg-red-100 text-red-600"
+      />
+      <StatCard
+        label="Avg Unit Price"
+        val={`$${analytics.avgPrice.toFixed(2)}`}
+        icon={<TrendingUp />}
+        color="bg-blue-100 text-blue-600"
+      />
+    </div>
+
+    {/* 2. RECENT ORDER AREA CHART */}
+    <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+      <div className="flex justify-between items-center mb-4 sm:mb-6 px-1 sm:px-2">
+        <h3 className="font-black text-base sm:text-lg">Recent Order</h3>
+        <button className="text-slate-400 font-bold">...</button>
+      </div>
+
+      <div className="h-52 sm:h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={dummyChartData}>
+            <defs>
+              <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }}
+            />
+            <Tooltip />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorValue)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+
+    {/* 3. MIDDLE SECTION */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+
+      {/* Top Products */}
+      <div className="bg-white p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h3 className="font-black text-base sm:text-lg">Top Products</h3>
+          <button
+>>>>>>> Stashed changes
             onClick={() => setActiveTab("products")}
             icon={<Package size={20} />}
             label="Inventory"
