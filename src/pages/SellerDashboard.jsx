@@ -19,6 +19,22 @@ import {
   XAxis, YAxis, CartesianGrid,
 } from "recharts";
 
+const dummyChartData = [
+  { name: 'Jan', value: 400 }, { name: 'Feb', value: 600 },
+  { name: 'Mar', value: 300 }, { name: 'Apr', value: 500 },
+  { name: 'May', value: 550 }, { name: 'Jun', value: 400 },
+  { name: 'Jul', value: 350 }, { name: 'Aug', value: 450 },
+  { name: 'Sep', value: 650 }, { name: 'Oct', value: 380 },
+  { name: 'Nov', value: 500 }, { name: 'Dec', value: 100 },
+];
+
+const dummyBarData = [
+  { name: 'Jan', val: 40 }, { name: 'Feb', val: 80 },
+  { name: 'Mar', val: 30 }, { name: 'Apr', val: 50 },
+  { name: 'May', val: 90 }, { name: 'Jun', val: 70 },
+  { name: 'Jul', val: 20 }, { name: 'Aug', val: 60 },
+];
+
 const SellerDashboard = () => {
   const {
     products,
@@ -187,28 +203,164 @@ const SellerDashboard = () => {
         </header>
 
         {/* --- VIEWS --- */}
-        {activeTab === "dashboard" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4">
-            <StatCard
-              label="Total Stock Value"
-              val={`$${analytics.totalVal.toLocaleString()}`}
-              icon={<DollarSign />}
-              color="bg-green-100 text-green-600"
-            />
-            <StatCard
-              label="Critical Stock"
-              val={analytics.lowStockCount}
-              icon={<AlertTriangle />}
-              color="bg-red-100 text-red-600"
-            />
-            <StatCard
-              label="Avg Unit Price"
-              val={`$${analytics.avgPrice.toFixed(2)}`}
-              icon={<TrendingUp />}
-              color="bg-blue-100 text-blue-600"
-            />
+        {/* --- DASHBOARD VIEW UPDATED --- */}
+{activeTab === "dashboard" && (
+  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+    
+    {/* 1. TOP STAT CARDS */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <StatCard
+        label="Total Stock Value"
+        val={`$${analytics.totalVal.toLocaleString()}`}
+        icon={<DollarSign />}
+        color="bg-green-100 text-green-600"
+      />
+      <StatCard
+        label="Critical Stock"
+        val={analytics.lowStockCount}
+        icon={<AlertTriangle />}
+        color="bg-red-100 text-red-600"
+      />
+      <StatCard
+        label="Avg Unit Price"
+        val={`$${analytics.avgPrice.toFixed(2)}`}
+        icon={<TrendingUp />}
+        color="bg-blue-100 text-blue-600"
+      />
+    </div>
+
+    {/* 2. RECENT ORDER AREA CHART (Similar to Capture.PNG) */}
+    <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+      <div className="flex justify-between items-center mb-6 px-2">
+        <h3 className="font-black text-lg">Recent Order</h3>
+        <button className="text-slate-400 font-bold">...</button>
+      </div>
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={dummyChartData}>
+            <defs>
+              <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold', fill: '#94a3b8'}} />
+            <Tooltip />
+            <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+
+    {/* 3. MIDDLE SECTION: TOP PRODUCTS & TOP COUNTRIES (Similar to Capture1.PNG) */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Top Products */}
+      <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-black text-lg">Top Products</h3>
+          <button className="text-blue-600 text-xs font-bold">View all</button>
+        </div>
+        <div className="space-y-4">
+          {products.slice(0, 4).map((p, i) => (
+            <div key={i} className="flex items-center justify-between group">
+              <div className="flex items-center gap-3">
+                <img src={p.image?.startsWith("data:") ? p.image : `/image/${p.category}/${p.image}`} 
+                     className="w-10 h-10 rounded-xl bg-slate-100 object-cover" 
+                     onError={(e) => (e.target.src = "https://placehold.co/100")} />
+                <div>
+                  <p className="text-sm font-bold truncate w-32">{p.title}</p>
+                  <p className="text-[10px] text-slate-400 font-bold">100 Items</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-slate-400 font-black uppercase">Coupon Code</p>
+                <p className="text-sm font-black">Sflat</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Top Countries by Sales */}
+      <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-black text-lg">Top Countries By Sales</h3>
+          <button className="text-blue-600 text-xs font-bold">View all</button>
+        </div>
+        <div className="flex items-center gap-2 mb-6">
+          <span className="text-2xl font-black">$37,802</span>
+          <span className="text-green-500 flex items-center text-xs font-bold"><TrendingUp size={14}/> 1.56%</span>
+        </div>
+        <div className="space-y-4">
+          {['Turkey', 'Belgium', 'Sweden', 'Vietnam'].map((country, i) => (
+            <div key={i} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-slate-100 overflow-hidden">
+                   {/* Flag placeholder */}
+                   <div className={`w-full h-full bg-blue-${(i+1)*100}`}></div>
+                </div>
+                <span className="text-sm font-bold text-slate-600">{country}</span>
+              </div>
+              <div className="flex items-center gap-10">
+                 <div className={`h-1 w-12 rounded-full ${i % 2 === 0 ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                 <span className="text-sm font-black text-slate-700">6,972</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* 4. BOTTOM SECTION: RECENT ORDERS & EARNINGS (Similar to Capture2.PNG) */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+       {/* Orders List */}
+       <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-black text-lg">Orders</h3>
+            <button className="text-slate-400">...</button>
           </div>
-        )}
+          <div className="space-y-5">
+            {products.slice(0, 5).map((p, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={p.image?.startsWith("data:") ? p.image : `/image/${p.category}/${p.image}`} className="w-10 h-10 rounded-xl object-cover border border-slate-50" onError={(e) => (e.target.src = "https://placehold.co/100")}/>
+                  <span className="text-sm font-bold text-slate-600 truncate w-40">{p.title}</span>
+                </div>
+                <span className="text-xs font-bold text-slate-400">20 Nov 2023</span>
+              </div>
+            ))}
+          </div>
+       </div>
+
+       {/* Earnings Bar Chart */}
+       <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-black text-lg">Earnings</h3>
+            <button className="text-slate-400">...</button>
+          </div>
+          <div className="space-y-2 mb-6">
+             <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                <span className="text-xs font-bold text-slate-400">Revenue</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <span className="text-2xl font-black">$37,802</span>
+                <span className="text-green-500 text-xs font-bold flex items-center"><TrendingUp size={12}/> 0.56%</span>
+             </div>
+          </div>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+               <BarChart data={dummyBarData}>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold'}} />
+                  <Bar dataKey="val" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={15} />
+               </BarChart>
+            </ResponsiveContainer>
+          </div>
+       </div>
+    </div>
+  </div>
+)}
 
         {activeTab === "products" && (
           <div className="bg-white rounded-3xl border shadow-sm overflow-hidden animate-in fade-in">
