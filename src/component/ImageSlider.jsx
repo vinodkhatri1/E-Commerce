@@ -52,7 +52,7 @@ const slides = [
   },
 ];
 
-const AUTO_TIME = 6000;
+const AUTO_TIME = 7000;
 
 const ImageSlider = () => {
   const [current, setCurrent] = useState(0);
@@ -92,7 +92,7 @@ const ImageSlider = () => {
 
   return (
     <div
-      className={`relative w-full overflow-hidden transition-all duration-700 bg-gradient-to-br ${slide.gradient}`}
+      className={`relative w-full overflow-hidden transition-all duration-700 bg-linear-to-br ${slide.gradient}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -105,7 +105,7 @@ const ImageSlider = () => {
       </div>
 
       {/* Main Content Container - Increased z-index to stay above background elements */}
-      <div className="container mx-auto px-12 md:px-20 flex flex-col-reverse md:flex-row items-center justify-between min-h-[450px] lg:min-h-[550px] py-10 md:py-0 relative z-10">
+      <div className="container mx-auto px-12 md:px-20 flex flex-col-reverse md:flex-row items-center justify-between min-h-112.5 lg:min-h-137.5 py-10 md:py-0 relative z-10">
         {/* Left Section */}
         <div className="flex flex-col gap-4 md:gap-5 text-center md:text-left items-center md:items-start max-w-lg">
           <div className="flex gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -151,7 +151,7 @@ const ImageSlider = () => {
         </div>
 
         {/* Right Section */}
-        <div className="relative w-full max-w-[280px] md:max-w-md lg:max-w-lg flex justify-center items-center mb-6 md:mb-0">
+        <div className="relative w-full max-w-70 md:max-w-md lg:max-w-lg flex justify-center items-center mb-6 md:mb-0">
           <div
             className={`absolute inset-0 scale-110 opacity-10 blur-[80px] rounded-full transition-all duration-700 ${slide.accent}`}
           />
@@ -162,7 +162,7 @@ const ImageSlider = () => {
             <img
               src={slide.image}
               alt={slide.title}
-              className="w-full h-[220px] md:h-[350px] lg:h-[400px] object-contain drop-shadow-xl mix-blend-mode-multiply"
+              className="w-full h-55 md:h-87.5 lg:h-100 object-contain drop-shadow-xl mix-blend-mode-multiply"
             />
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-4 bg-slate-900/5 blur-2xl rounded-[100%]" />
           </div>
