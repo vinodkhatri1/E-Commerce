@@ -14,6 +14,7 @@ import Checkout from "./pages/Checkout";
 import { AuthProvider } from "./context/AuthContext";
 import { ProductProvider } from "./context/productContext";
 import UserProfile from "./component/UserProfile";
+import OrderHistory from "./pages/Orders";
 const App = () => {
   const ScrollToTop = () => {
     const { pathname } = useLocation();
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/search" element={<SearchResults />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/userprofile" element={<UserProfile />} />
+            <Route path="/orders" element={<OrderHistory />} />
           </Routes>
           <Footer />
         </AuthProvider>
