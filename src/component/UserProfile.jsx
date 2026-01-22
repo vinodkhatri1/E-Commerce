@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import DetailedOrderCard from "./DetailedOrderCard";
+// Removed DetailedOrderCard import
 import {
   Clock,
   Trash2,
@@ -15,18 +15,23 @@ import {
   Loader2,
   AlertTriangle,
   LogOut,
+  Package, // Added Package icon
+  ChevronRight, // Added Chevron
 } from "lucide-react";
 
 const UserProfile = () => {
   const { user, logout } = useAuth();
-  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart } =
-    useCart();
+  const { cart, addToCart, decreaseQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
 
-  const [orders, setOrders] = useState([]);
+  // Removed orders state since we load them on the other page now
+  // We can keep a simple count if we want, but let's keep it clean
+  const [orderCount, setOrderCount] = useState(0);
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // Safety toggle
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const [addressInfo, setAddressInfo] = useState({
     email: "",
     firstName: "",
@@ -38,10 +43,12 @@ const UserProfile = () => {
 
   useEffect(() => {
     if (user?.email) {
-      const savedOrders = localStorage.getItem(`orders_${user.email}`);
       const savedAddress = localStorage.getItem(`address_${user.email}`);
+      // Just check existence of orders for count
+      const savedOrders = localStorage.getItem(`orders_${user.email}`);
 
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
+      if (savedOrders) setOrderCount(JSON.parse(savedOrders).length);
+
       if (savedAddress) {
         setAddressInfo(JSON.parse(savedAddress));
       } else {
@@ -54,16 +61,13 @@ const UserProfile = () => {
   const handleDeleteAccount = () => {
     if (!user?.email) return;
 
-    // 1. Remove from global users list
     const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
     const updatedUsers = allUsers.filter((u) => u.email !== user.email);
     localStorage.setItem("users", JSON.stringify(updatedUsers));
 
-    // 2. Wipe user-specific data
     localStorage.removeItem(`orders_${user.email}`);
     localStorage.removeItem(`address_${user.email}`);
 
-    // 3. Logout and redirect
     logout();
     navigate("/");
     alert("Account permanently deleted.");
@@ -99,16 +103,12 @@ const UserProfile = () => {
   const handlePayment = () => {
     if (cart.length === 0) return;
 
-    // 1. Validate that the user has filled in at least the basic address info
     if (!addressInfo.address || !addressInfo.city || !addressInfo.zip) {
       alert("Please complete your Delivery Address details before proceeding.");
       return;
     }
 
-    // 2. Ensure the latest address info is saved so Checkout can pull it
     localStorage.setItem(`address_${user.email}`, JSON.stringify(addressInfo));
-
-    // 3. Navigate to the specialized Checkout page
     navigate("/checkout");
   };
 
@@ -124,6 +124,7 @@ const UserProfile = () => {
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LEFT COLUMN */}
         <aside className="lg:col-span-4 space-y-6">
+          {/* Avatar Card */}
           <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 text-center">
             <img
               src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name || "User"}&backgroundColor=2563eb`}
@@ -141,20 +142,38 @@ const UserProfile = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Clock size={14} className="text-blue-600" /> Order History
-            </h3>
-            <div className="space-y-3">
-              {orders.length === 0 ? (
-                <p className="text-[10px] text-slate-300 italic text-center py-4">
-                  No orders yet
-                </p>
-              ) : (
-                orders.map((o) => <DetailedOrderCard key={o.id} order={o} />)
-              )}
+          {/* NEW: Navigation Card to Order History */}
+          <Link to="/orders" className="block group">
+            <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 group-hover:border-blue-300 transition-all group-hover:shadow-md">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Clock size={14} className="text-blue-600" /> Order History
+                </h3>
+                <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-full">
+                  {orderCount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                    <Package size={20} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">
+                      Track Orders
+                    </p>
+                    <p className="text-xs text-slate-400 font-medium">
+                      View past purchases
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight
+                  size={18}
+                  className="text-slate-300 group-hover:text-blue-600 transition-colors"
+                />
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* DANGER ZONE */}
           <div className="bg-red-50/50 rounded-4xl p-6 border border-red-100">
@@ -192,8 +211,9 @@ const UserProfile = () => {
           </div>
         </aside>
 
-        {/* RIGHT COLUMN (Form remains same) */}
+        {/* RIGHT COLUMN (Same Form & Bag) */}
         <main className="lg:col-span-8 space-y-6">
+          {/* Shipping Form */}
           <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200 relative">
             <div className="flex justify-between items-start mb-8">
               <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3 uppercase">
@@ -296,6 +316,7 @@ const UserProfile = () => {
             </div>
           </div>
 
+          {/* Cart Section */}
           <div className="space-y-4 pt-4">
             <h2 className="text-xl font-black text-slate-900 px-2 tracking-tight uppercase flex items-center justify-between">
               Current Bag
