@@ -2,21 +2,33 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 const CART_KEY = "cart_items";
+const WISHLIST_KEY = "wishlist_items"; // NEW
 
 export const CartProvider = ({ children }) => {
-  // 1. Existing Cart Logic
+  // --- Cart State ---
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem(CART_KEY);
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // 2. NEW: UI State for the Cart Sidebar
+  // --- Wishlist State (NEW) ---
+  const [wishlist, setWishlist] = useState(() => {
+    const savedWishlist = localStorage.getItem(WISHLIST_KEY);
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
+  });
+
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
 
+  // Sync Wishlist to LocalStorage (NEW)
+  useEffect(() => {
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  // --- Cart Functions ---
   const addToCart = (product) => {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === product.id);
@@ -24,7 +36,7 @@ export const CartProvider = ({ children }) => {
         return prevCart.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
-            : item
+            : item,
         );
       }
       return [...prevCart, { ...product, quantity: 1 }];
@@ -39,17 +51,30 @@ export const CartProvider = ({ children }) => {
     setCart((prevCart) =>
       prevCart
         .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+          item.id === id ? { ...item, quantity: item.quantity - 1 } : item,
         )
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
   };
+
   const clearCart = () => {
     setCart([]);
     localStorage.removeItem(CART_KEY);
   };
 
-  // 3. NEW: Helper functions to control the sidebar
+  // --- Wishlist Functions (NEW) ---
+  const toggleWishlist = (product) => {
+    setWishlist((prev) => {
+      const isExist = prev.find((item) => item.id === product.id);
+      if (isExist) {
+        return prev.filter((item) => item.id !== product.id);
+      }
+      return [...prev, product];
+    });
+  };
+
+  const isInWishlist = (id) => wishlist.some((item) => item.id === id);
+
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
@@ -60,11 +85,14 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         decreaseQuantity,
-        // Export the new UI state and functions
+        clearCart,
         isCartOpen,
         openCart,
         closeCart,
-        clearCart,
+        // New Values
+        wishlist,
+        toggleWishlist,
+        isInWishlist,
       }}
     >
       {children}
@@ -72,5 +100,4 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useCart = () => useContext(CartContext);
