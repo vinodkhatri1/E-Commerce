@@ -18,7 +18,7 @@ import {
   YAxis,
 } from "recharts";
 
-import StatCard from "../components/StatCard";
+import StatCard from "../component/StateCards";
 
 const SellerDashboardDashboard = ({ products, categories, analytics }) => {
   const dummyChartData = [
