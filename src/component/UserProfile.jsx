@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import DetailedOrderCard from "./DetailedOrderCard";
 import {
   Clock,
   Trash2,
@@ -15,6 +14,8 @@ import {
   Loader2,
   AlertTriangle,
   LogOut,
+  Package,
+  ChevronRight,
 } from "lucide-react";
 
 const UserProfile = () => {
@@ -22,11 +23,11 @@ const UserProfile = () => {
   const { cart, addToCart, decreaseQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
 
-  // State
-  const [orders, setOrders] = useState([]);
+  const [orderCount, setOrderCount] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const [addressInfo, setAddressInfo] = useState({
     email: "",
     firstName: "",
@@ -36,30 +37,32 @@ const UserProfile = () => {
     zip: "",
   });
 
-  // Helper for localStorage keys
-  const getKeys = (email) => ({
+  const getKeys = useCallback((email) => ({
     orders: `orders_${email}`,
     address: `address_${email}`,
-  });
+  }), []);
 
   useEffect(() => {
     if (user?.email) {
       const keys = getKeys(user.email);
-      const savedOrders = localStorage.getItem(keys.orders);
       const savedAddress = localStorage.getItem(keys.address);
+      const savedOrders = localStorage.getItem(keys.orders);
 
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
       if (savedAddress) {
         setAddressInfo(JSON.parse(savedAddress));
       } else {
         setAddressInfo((prev) => ({ ...prev, email: user.email }));
       }
-    }
-  }, [user]);
 
-  // Derived Values (Optimized)
-  const subtotal = useMemo(() => 
-    cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0), 
+      if (savedOrders) {
+        const parsedOrders = JSON.parse(savedOrders);
+        setOrderCount(parsedOrders.length);
+      }
+    }
+  }, [user, getKeys]);
+
+  const subtotal = useMemo(() =>
+    cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0),
   [cart]);
 
   const total = useMemo(() => {
@@ -67,7 +70,6 @@ const UserProfile = () => {
     return (subtotal + shipping).toFixed(2);
   }, [subtotal]);
 
-  // Actions
   const handleAddressChange = useCallback((e) => {
     const { name, value } = e.target;
     setAddressInfo((prev) => ({ ...prev, [name]: value }));
@@ -78,14 +80,13 @@ const UserProfile = () => {
     if (!user?.email) return;
     setIsSaving(true);
     
-    // Simulate API Delay
     setTimeout(() => {
       localStorage.setItem(getKeys(user.email).address, JSON.stringify(addressInfo));
       setIsSaving(false);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     }, 800);
-  }, [user?.email, addressInfo]);
+  }, [user?.email, addressInfo, getKeys]);
 
   const handleDeleteAccount = () => {
     if (!user?.email) return;
@@ -111,14 +112,11 @@ const UserProfile = () => {
     }
 
     localStorage.setItem(getKeys(user.email).address, JSON.stringify(addressInfo));
-    navigate("/checkout");
+    // Proceed to payment logic here
+    alert("Proceeding to payment...");
   };
 
-  if (!user) return (
-    <div className="p-20 text-center font-black text-slate-300 uppercase tracking-widest">
-      Loading Profile...
-    </div>
-  );
+  if (!user) return <div className="min-h-screen flex items-center justify-center font-black">Loading Profile...</div>;
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
@@ -141,18 +139,30 @@ const UserProfile = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Clock size={14} className="text-blue-600" /> Order History
-            </h3>
-            <div className="space-y-3">
-              {orders.length === 0 ? (
-                <p className="text-[10px] text-slate-300 italic text-center py-4">No orders yet</p>
-              ) : (
-                orders.map((o) => <DetailedOrderCard key={o.id} order={o} />)
-              )}
+          <Link to="/orders" className="block group">
+            <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 group-hover:border-blue-300 transition-all group-hover:shadow-md">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Clock size={14} className="text-blue-600" /> Order History
+                </h3>
+                <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-full">
+                  {orderCount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                    <Package size={20} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">Track Orders</p>
+                    <p className="text-xs text-slate-400 font-medium">View past purchases</p>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
+              </div>
             </div>
-          </div>
+          </Link>
 
           <div className="bg-red-50/50 rounded-4xl p-6 border border-red-100">
             <h3 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -166,7 +176,7 @@ const UserProfile = () => {
                 Delete Account
               </button>
             ) : (
-              <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+              <div className="space-y-3">
                 <p className="text-[10px] font-bold text-red-600 text-center leading-tight">
                   This action is permanent. All orders and data will be wiped.
                 </p>
@@ -199,25 +209,25 @@ const UserProfile = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {[
-                    { label: "Email", name: "email", span: "md:col-span-2" },
-                    { label: "First Name", name: "firstName", placeholder: "Alex" },
-                    { label: "Last Name", name: "lastName", placeholder: "Doe" },
-                    { label: "Address", name: "address", placeholder: "123 Street Name", span: "md:col-span-2" },
-                    { label: "City", name: "city", placeholder: "New York" },
-                    { label: "ZIP Code", name: "zip", placeholder: "10001" }
-                ].map((field) => (
-                    <div key={field.name} className={`${field.span || ""} space-y-1`}>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{field.label}</label>
-                        <input
-                            name={field.name}
-                            value={addressInfo[field.name]}
-                            onChange={handleAddressChange}
-                            placeholder={field.placeholder}
-                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none transition-all"
-                        />
-                    </div>
-                ))}
+              {[
+                { label: "Email", name: "email", span: "md:col-span-2" },
+                { label: "First Name", name: "firstName", placeholder: "Alex" },
+                { label: "Last Name", name: "lastName", placeholder: "Doe" },
+                { label: "Address", name: "address", placeholder: "123 Street Name", span: "md:col-span-2" },
+                { label: "City", name: "city", placeholder: "New York" },
+                { label: "ZIP Code", name: "zip", placeholder: "10001" }
+              ].map((field) => (
+                <div key={field.name} className={`${field.span || ""} space-y-1`}>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{field.label}</label>
+                  <input
+                    name={field.name}
+                    value={addressInfo[field.name] || ""}
+                    onChange={handleAddressChange}
+                    placeholder={field.placeholder}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-bold focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
