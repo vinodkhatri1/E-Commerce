@@ -32,7 +32,7 @@ const Header = () => {
 
   // Auth & Cart Contexts
   const { user, isLoginOpen, openLogin, closeLogin, logout } = useAuth();
-  const { cart, isCartOpen, openCart, closeCart } = useCart();
+  const { cart, isCartOpen, openCart, closeCart, wishlist } = useCart();
 
   // State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -137,12 +137,12 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <header className="sticky top-0 z-[100] bg-white border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-100 bg-white border-b border-gray-100 shadow-sm">
         {/* --- 1. Main Navigation Row --- */}
-        <div className="max-w-[1440px] mx-auto px-4 py-3 md:py-0 md:h-20 flex items-center justify-between gap-x-4">
+        <div className="max-w-360 mx-auto px-4 py-3 md:py-0 md:h-20 flex items-center justify-between gap-x-4">
           {/* Logo */}
           <Link to="/" className="shrink-0 order-1">
-            <img className="h-10 md:h-14 w-auto" src={logo} alt="Logo" />
+            <img className="h-15 md:h-18 w-auto" src={logo} alt="Logo" />
           </Link>
 
           {/* Search Bar - Hidden on small mobile, visible on tablet/desktop */}
@@ -161,7 +161,7 @@ const Header = () => {
                   aria-label="Select Category"
                   className="appearance-none bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 
                pl-4 pr-10 py-3 rounded-l-lg border-r border-gray-200 outline-none 
-               cursor-pointer h-full transition-colors capitalize truncate max-w-[150px]"
+               cursor-pointer h-full transition-colors capitalize truncate max-w-37.5"
                 >
                   <option value="All">All Categories</option>
                   {dynamicCategories.map((cat) => (
@@ -195,7 +195,7 @@ const Header = () => {
 
             {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-[110]">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-110">
                 {suggestions.map((p) => (
                   <div
                     key={p.id}
@@ -227,11 +227,13 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="flex items-center gap-2 sm:gap-4 order-3">
-            <Link
-              to="/wishlist"
-              className="hidden sm:flex p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            >
+            <Link to="/wishlist" className="relative p-2">
               <Heart size={22} />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                  {wishlist.length}
+                </span>
+              )}
             </Link>
 
             <div
@@ -273,7 +275,7 @@ const Header = () => {
 
               {/* Account Dropdown */}
               {user && isUserDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 w-56 overflow-hidden z-[120] animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 w-56 overflow-hidden z-120 animate-in fade-in zoom-in-95 duration-200">
                   <div className="p-4 bg-gray-50 border-b border-gray-100">
                     <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
                       Account
@@ -335,7 +337,7 @@ const Header = () => {
 
         {/* --- 3. Category Bar --- */}
         <div className="bg-slate-900 text-white text-[11px] font-bold">
-          <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-6 py-2.5 overflow-x-auto no-scrollbar whitespace-nowrap uppercase tracking-wider">
+          <div className="max-w-360 mx-auto px-4 flex items-center gap-6 py-2.5 overflow-x-auto no-scrollbar whitespace-nowrap uppercase tracking-wider">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="flex items-center gap-2 hover:text-indigo-400 transition-colors shrink-0"
@@ -369,11 +371,11 @@ const Header = () => {
 
       {/* --- MOBILE SIDEBAR --- */}
       <div
-        className={`fixed inset-0 bg-black/60 z-[200] transi tion-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 bg-black/60 z-200 transi tion-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsMobileMenuOpen(false)}
       />
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-white z-[201] transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-72 bg-white z-201 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* FIXED SIDEBAR HEADER */}
         <div className="bg-slate-800 text-white p-6 flex items-center gap-4">
@@ -461,7 +463,7 @@ const Header = () => {
       {/* --- Modals --- */}
       {isCartOpen && <Cart setIsOpenCart={closeCart} />}
       {isLoginOpen && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
           <LogIn onClose={closeLogin} />
         </div>
       )}

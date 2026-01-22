@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import ProductCard from "../component/ProductCard";
 import ReviewComments from "../component/ReviewComments";
 import Stars from "../component/Stars";
-import { ShoppingCart, CreditCard } from "lucide-react";
+// FIX: Added Heart to the imports
+import { ShoppingCart, CreditCard, Heart } from "lucide-react";
 import ProductImege from "../component/ProductImege";
 import ProductData from "../Data/ProductData";
 import { useCart } from "../context/CartContext";
@@ -11,43 +12,42 @@ import { useAuth } from "../context/AuthContext";
 
 const Product = () => {
   const { id } = useParams();
-  const { addToCart, openCart } = useCart();
+  const { addToCart, openCart, toggleWishlist, isInWishlist } = useCart();
+  const { user, openLogin } = useAuth();
 
   const product = ProductData.find((p) => p.id === Number(id));
   const [image, setImage] = useState("");
-  const { isLoggedIn, openLogin } = useAuth();
+
+  // FIX: Ensure isInWishlist uses product.id as per context logic
+  const activeWishlist = product ? isInWishlist(product.id) : false;
 
   const handleBuyNow = () => {
-    // 3. THE CHECK: Is user logged in?
-    if (!isLoggedIn) {
-      openLogin(); // If no, open the modal immediately
-      return; // Stop here. Do not add to cart.
+    if (!user) {
+      openLogin();
+      return;
     }
-
-    // If yes, proceed normally
     addToCart(product);
     openCart();
   };
+
   useEffect(() => {
     if (product) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setImage(
         product.image?.startsWith("data:")
           ? product.image
           : `/image/${product.category}/${product.image}`,
       );
-      // Scroll to top when product changes
       window.scrollTo(0, 0);
     }
   }, [id, product]);
+
   if (!product)
     return (
-      <div className="p-10 text-center text-xl text-red-500">
+      <div className="p-10 text-center text-xl text-red-500 font-bold">
         Product not found
       </div>
     );
 
-  // Assuming product has multiple images, or reusing same for demo
   const pic = [
     product.image?.startsWith("data:")
       ? product.image
@@ -59,14 +59,13 @@ const Product = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Main Product Section */}
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 border-b border-gray-200 pb-12">
         {/* Left: Images */}
         <div className="w-full lg:w-1/2 flex flex-col items-center">
-          <div className="w-full max-w-lg aspect-square bg-white border rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg aspect-square bg-white border border-gray-100 rounded-2xl overflow-hidden mb-4 flex items-center justify-center p-6 shadow-sm">
             <img
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
               src={image}
               alt={product.title}
             />
@@ -76,23 +75,27 @@ const Product = () => {
 
         {/* Right: Details */}
         <div className="w-full lg:w-1/2 flex flex-col">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
             {product.title}
           </h2>
 
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-6">
             <Stars rating={product.rating} />
-            <span className="text-sm text-gray-500">
+            <span className="text-sm font-semibold text-slate-500">
               ({product.rating} Rating)
             </span>
           </div>
 
-          <div className="mb-6">
-            <p className="text-3xl font-bold text-blue-600">${product.price}</p>
+          <div className="mb-8">
+            <p className="text-4xl font-black text-blue-600">
+              ${product.price}
+            </p>
             {product.originalPrice && (
-              <p className="flex gap-2 text-sm text-gray-500 mt-1">
-                <span className="line-through">${product.originalPrice}</span>
-                <span className="font-bold text-green-600">
+              <p className="flex items-center gap-2 text-sm mt-1">
+                <span className="line-through text-slate-400 font-medium">
+                  ${product.originalPrice}
+                </span>
+                <span className="font-black text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase text-[10px]">
                   -{product.discountPercent}% Off
                 </span>
               </p>
@@ -100,38 +103,44 @@ const Product = () => {
           </div>
 
           {/* Specs */}
-          <div className="space-y-2 mb-6 text-sm sm:text-base text-gray-700">
-            <div className="flex">
-              <span className="font-bold w-24">Brand:</span>
-              <span>{product.brand}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8 mb-8 text-slate-700">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-400 text-sm uppercase w-20">
+                Brand:
+              </span>
+              <span className="font-bold">{product.brand}</span>
             </div>
-            <div className="flex">
-              <span className="font-bold w-24">Category:</span>
-              <span className="capitalize">{product.category}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-400 text-sm uppercase w-20">
+                Category:
+              </span>
+              <span className="font-bold capitalize">{product.category}</span>
             </div>
-            <div className="flex">
-              <span className="font-bold w-24">Stock:</span>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-400 text-sm uppercase w-20">
+                Stock:
+              </span>
               <span
-                className={
-                  product.stock > 0 ? "text-green-600" : "text-red-600"
-                }
+                className={`font-bold ${product.stock > 0 ? "text-green-600" : "text-red-600"}`}
               >
                 {product.stock > 0 ? "In Stock" : "Out of Stock"}
               </span>
             </div>
           </div>
 
-          <div className="mb-8">
-            <h4 className="font-bold text-gray-900 mb-2">About the product</h4>
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+          <div className="mb-10">
+            <h4 className="font-black text-slate-900 mb-2 uppercase text-xs tracking-widest">
+              About the product
+            </h4>
+            <p className="text-slate-600 leading-relaxed font-medium">
               {product.description}
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mt-auto">
+          <div className="flex flex-wrap gap-4 mt-auto">
             <button
-              className="flex-1 h-12 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition flex items-center justify-center gap-2 font-bold"
+              className="flex-1 min-w-40 h-14 bg-blue-600 text-white hover:bg-slate-900 rounded-2xl transition-all flex items-center justify-center gap-2 font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-100"
               onClick={() => addToCart(product)}
             >
               <ShoppingCart size={20} />
@@ -140,36 +149,54 @@ const Product = () => {
 
             <button
               onClick={handleBuyNow}
-              className="flex-1 h-12 bg-gray-900 hover:bg-black text-white rounded-xl font-bold text-lg shadow-xl shadow-gray-200 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 h-14 bg-gray-500 text-white hover:bg-black  rounded-xl font-bold text-lg shadow-xl shadow-gray-200 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <CreditCard size={20} />
               Buy Now
+            </button>
+
+            {/* Wishlist Button */}
+            <button
+              onClick={() => toggleWishlist(product)}
+              title={
+                activeWishlist ? "Remove from Wishlist" : "Add to Wishlist"
+              }
+              className={`w-14 h-14 rounded-2xl transition-all duration-300 flex items-center justify-center border-2 ${
+                activeWishlist
+                  ? "bg-pink-50 border-pink-200 text-pink-600"
+                  : "bg-white border-slate-100 text-slate-400 hover:text-pink-600 hover:border-pink-200"
+              }`}
+            >
+              <Heart
+                size={24}
+                fill={activeWishlist ? "currentColor" : "none"}
+              />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Reviews & Similar Products */}
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Reviews taking up 2/3 on desktop, full on mobile */}
-        <div className="lg:col-span-4">
-          <ReviewComments />
-        </div>
+      {/* Reviews */}
+      <div className="mt-12">
+        <ReviewComments />
       </div>
 
-      {/* Similar Products Section */}
-      <div className="mt-16">
-        <h1 className="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4">
+      {/* Similar Products */}
+      <div className="mt-20">
+        <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-4">
           Similar Products
-        </h1>
+          <div className="h-1 flex-1 bg-slate-100 rounded-full"></div>
+        </h3>
         {similarProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {similarProducts.slice(0, 4).map((item) => (
               <ProductCard key={item.id} productdt={item} />
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No similar products found.</p>
+          <p className="text-slate-400 font-medium italic">
+            No similar products found in this category.
+          </p>
         )}
       </div>
     </div>

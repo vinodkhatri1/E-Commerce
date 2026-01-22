@@ -1,11 +1,14 @@
 import Stars from "./Stars";
-import { ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 const ProductCard = ({ productdt }) => {
-  const { addToCart } = useCart();
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+
   if (!productdt) return null;
+
+  const activeWishlist = isInWishlist(productdt.id);
 
   return (
     <div className="w-full h-full bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group">
@@ -19,8 +22,8 @@ const ProductCard = ({ productdt }) => {
             className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-110"
             src={
               productdt.image?.startsWith("data:")
-                ? productdt.image // If it's a new upload, use the string directly
-                : `/image/${productdt.category}/${productdt.image}` // If it's an old file, use the folder path
+                ? productdt.image
+                : `/image/${productdt.category}/${productdt.image}`
             }
             alt={productdt.title}
           />
@@ -50,7 +53,7 @@ const ProductCard = ({ productdt }) => {
           <span className="text-xs text-gray-500">({productdt.rating})</span>
         </div>
 
-        {/* Price & Action - Pushed to bottom */}
+        {/* Price & Action */}
         <div className="mt-auto flex justify-between items-end">
           <div>
             <p className="text-lg font-bold text-blue-600">
@@ -62,14 +65,33 @@ const ProductCard = ({ productdt }) => {
               </span>
             )}
           </div>
+          <div className="flex gap-2">
+            <button
+              className="bg-gray-100 text-gray-800 p-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
+              onClick={() => addToCart(productdt)}
+              title="Add to Cart"
+            >
+              <ShoppingCart size={20} />
+            </button>
 
-          <button
-            className="bg-gray-100 text-gray-800 p-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
-            onClick={() => addToCart(productdt)}
-            title="Add to Cart"
-          >
-            <ShoppingCart size={20} />
-          </button>
+            {/* Wishlist Button Updated */}
+            <button
+              className={`p-2 rounded-lg transition-colors ${
+                activeWishlist
+                  ? "bg-pink-100 text-pink-600 shadow-inner"
+                  : "bg-gray-100 text-gray-800 hover:bg-pink-600 hover:text-white"
+              }`}
+              onClick={() => toggleWishlist(productdt)}
+              title={
+                activeWishlist ? "Remove from Wishlist" : "Add to Wishlist"
+              }
+            >
+              <Heart
+                size={20}
+                fill={activeWishlist ? "currentColor" : "none"} // Fills the heart when active
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -93,7 +93,7 @@ const Footer = () => {
 
         {/* Newsletter Section */}
         <div className="lg:col-span-4">
-          <div className="bg-slate-900 p-8 rounded-[2rem] text-white shadow-xl shadow-blue-900/10">
+          <div className="bg-slate-900 p-8 rounded-4xl text-white shadow-xl shadow-blue-900/10">
             <h4 className="text-lg font-black tracking-tight mb-2">
               Join the club
             </h4>
