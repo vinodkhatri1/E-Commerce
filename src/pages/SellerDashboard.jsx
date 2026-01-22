@@ -285,7 +285,7 @@ const SellerDashboard = () => {
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 sm:right-0 left-0 sm:left-auto mt-2 w-full sm:w-40 bg-white border rounded-xl shadow-lg z-50">
+               <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg z-50">
                   <button
                     onClick={() => {
                       navigate("/UserProfile");
