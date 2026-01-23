@@ -36,7 +36,7 @@ const Checkout = () => {
         setFormData((prev) => ({
           ...prev,
           ...parsed,
-          zipCode: parsed.zip || "", // Mapping 'zip' from profile to 'zipCode'
+          zipCode: parsed.zip || "",
           email: parsed.email || user.email,
         }));
       }
@@ -78,8 +78,6 @@ const Checkout = () => {
       setValidationErrors(errors);
       return;
     }
-
-    // Save final order to history
     const orderID = `SLT-${Math.floor(1000 + Math.random() * 9000)}-ZP`;
     const newOrder = {
       id: orderID,

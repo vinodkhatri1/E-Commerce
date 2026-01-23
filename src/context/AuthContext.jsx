@@ -5,7 +5,6 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  // Initialize user from LocalStorage
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("activeUser");
     return savedUser ? JSON.parse(savedUser) : null;

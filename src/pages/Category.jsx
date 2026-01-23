@@ -5,9 +5,8 @@ import ProductData from "../Data/ProductData";
 const Category = () => {
   const { category } = useParams();
 
-  // Filter products of this category (Case insensitive safety)
   const products = ProductData.filter(
-    (p) => p.category.toLowerCase() === category?.toLowerCase()
+    (p) => p.category.toLowerCase() === category?.toLowerCase(),
   );
 
   return (
@@ -24,7 +23,9 @@ const Category = () => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-gray-500 text-lg">No products found in this category.</p>
+          <p className="text-gray-500 text-lg">
+            No products found in this category.
+          </p>
         </div>
       )}
     </div>

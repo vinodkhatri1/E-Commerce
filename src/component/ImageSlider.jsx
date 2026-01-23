@@ -86,16 +86,15 @@ const ImageSlider = () => {
         nextSlide();
       },
       AUTO_TIME * (1 - progress / 100),
-    ); // Account for remaining time
+    );
 
     return () => clearTimeout(timer);
   }, [current, isHovered, progress, nextSlide]);
   useEffect(() => {
     if (isHovered) return;
 
-    // Start the progress
     const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 0 : prev + 0.5)); // Fine-grained update
+      setProgress((prev) => (prev >= 100 ? 0 : prev + 0.5));
     }, AUTO_TIME / 200);
 
     return () => clearInterval(interval);

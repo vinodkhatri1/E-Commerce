@@ -12,8 +12,7 @@ import { useAuth } from "../context/AuthContext";
 
 const LogIn = ({ onClose }) => {
   const { login } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between Login and Signup
-  const [email, setEmail] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,11 +22,9 @@ const LogIn = ({ onClose }) => {
     e.preventDefault();
     setError("");
 
-    // Get all users from local storage or empty array
     const users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
 
     if (isSignUp) {
-      // --- SIGN UP LOGIC ---
       const userExists = users.find((u) => u.email === email);
       if (userExists) return setError("User already exists!");
 
@@ -35,11 +32,9 @@ const LogIn = ({ onClose }) => {
       users.push(newUser);
       localStorage.setItem("registeredUsers", JSON.stringify(users));
 
-      // Auto login after signup
       login({ name, email });
       onClose();
     } else {
-      // --- LOGIN LOGIC ---
       const foundUser = users.find(
         (u) => u.email === email && u.password === password,
       );

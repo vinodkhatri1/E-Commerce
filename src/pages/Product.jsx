@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import ProductCard from "../component/ProductCard";
 import ReviewComments from "../component/ReviewComments";
 import Stars from "../component/Stars";
-// FIX: Added Heart to the imports
 import { ShoppingCart, CreditCard, Heart } from "lucide-react";
 import ProductImege from "../component/ProductImege";
 import ProductData from "../Data/ProductData";
@@ -18,7 +17,6 @@ const Product = () => {
   const product = ProductData.find((p) => p.id === Number(id));
   const [image, setImage] = useState("");
 
-  // FIX: Ensure isInWishlist uses product.id as per context logic
   const activeWishlist = product ? isInWishlist(product.id) : false;
 
   const handleBuyNow = () => {

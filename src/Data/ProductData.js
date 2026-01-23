@@ -556,7 +556,6 @@ const getLiveDashboardData = () => {
   return originalData;
 };
 
-// We export the RESULT of the function
 const ProductData = getLiveDashboardData();
 
 export default ProductData;

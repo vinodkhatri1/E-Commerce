@@ -88,7 +88,7 @@ const ProductCard = ({ productdt }) => {
             >
               <Heart
                 size={20}
-                fill={activeWishlist ? "currentColor" : "none"} // Fills the heart when active
+                fill={activeWishlist ? "currentColor" : "none"}
               />
             </button>
           </div>
