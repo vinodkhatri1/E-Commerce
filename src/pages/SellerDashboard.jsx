@@ -1,103 +1,45 @@
-import { useState, useMemo, useEffect } from "react";
-import { useProducts } from "../context/productContext";
+import React, { useState, useMemo } from "react";
 import {
   LayoutDashboard,
   Package,
   PlusCircle,
-  RotateCcw,
-  Menu,
-  User,
-  Home,
-  X,
+  Search,
+  Settings2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useProducts } from "../context/productContext"; // Import your context hook
 
-import DashboardView from "./SellerDashboardDashboard";
-import Products1 from "./Products1";
-import AddProduct from "./AddProduct";
+// Local Component Imports
+import DashboardViewGraph from "../component/DashboardViewGraph";
+import Products1 from "../component/Products1";
+import AddProduct from "../component/AddProduct";
 
 const SellerDashboard = () => {
+  // 1. Consume Context
   const {
     products,
-    categories,
-    deleteProduct,
     addProduct,
     updateProduct,
+    deleteProduct,
+    categories,
     resetData,
   } = useProducts();
 
-  const navigate = useNavigate();
-
+  // 2. UI State
   const [activeTab, setActiveTab] = useState("dashboard");
   const [editItem, setEditItem] = useState(null);
-  const [previewImage, setPreviewImage] = useState("");
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
+  // 3. Form-specific State
+  const [previewImage, setPreviewImage] = useState(null);
   const [pricing, setPricing] = useState({
     price: "",
     originalPrice: "",
     discountPercent: 0,
   });
-
-  useEffect(() => {
-    if (editItem) {
-      setPricing({
-        price: editItem.price || "",
-        originalPrice: editItem.originalPrice || "",
-        discountPercent: editItem.discountPercent || 0,
-      });
-      setPreviewImage(editItem.image || "");
-    } else {
-      setPricing({ price: "", originalPrice: "", discountPercent: 0 });
-      setPreviewImage("");
-    }
-  }, [editItem]);
-
-  useEffect(() => {
-    const header = document.querySelector("header");
-    if (header) header.style.display = "none";
-    return () => {
-      if (header) header.style.display = "";
-    };
-  }, []);
-
-  const handlePriceChange = (e) => {
-    const { name, value } = e.target;
-    const val = value === "" ? "" : Number(value);
-
-    setPricing((prev) => {
-      const updated = { ...prev, [name]: val };
-      if (updated.originalPrice > 0 && updated.originalPrice > updated.price) {
-        updated.discountPercent = Math.round(
-          ((updated.originalPrice - updated.price) / updated.originalPrice) * 100
-        );
-      } else {
-        updated.discountPercent = 0;
-      }
-      return updated;
-    });
-  };
-
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "auto";
-  }, [mobileOpen]);
-
-  useEffect(() => {
-    const close = (e) => {
-      if (!e.target.closest("[data-dd='seller']")) {
-        setMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
-  }, []);
-
   const analytics = useMemo(() => {
     const totalVal = products.reduce(
       (sum, p) => sum + Number(p.price) * Number(p.stock),
-      0
+      0,
     );
     const lowStockCount = products.filter((p) => p.stock < 10).length;
     const avgPrice = products.length
@@ -105,257 +47,189 @@ const SellerDashboard = () => {
       : 0;
     return { totalVal, lowStockCount, avgPrice };
   }, [products]);
+  // 4. Derived State: Filtered Products for Search
+  const filteredProducts = useMemo(() => {
+    return products.filter(
+      (p) =>
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.brand?.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [products, searchQuery]);
 
+  // Logic: Handle Price & Discount (Syncing to Local State for live UI feedback)
+  const handlePriceChange = (e) => {
+    const { name, value } = e.target;
+    const newPricing = { ...pricing, [name]: value };
+    if (newPricing.price && newPricing.originalPrice) {
+      const disc =
+        ((newPricing.originalPrice - newPricing.price) /
+          newPricing.originalPrice) *
+        100;
+      newPricing.discountPercent = disc > 0 ? Math.round(disc) : 0;
+    } else {
+      newPricing.discountPercent = 0;
+    }
+    setPricing(newPricing);
+  };
+
+  // Logic: Image Preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
+      reader.onloadend = () => setPreviewImage(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
+  // Logic: Final Submission using Context functions
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-
-    const payload = {
-      ...data,
-      id: editItem ? editItem.id : Date.now(),
-      price: Number(pricing.price),
-      originalPrice: Number(pricing.originalPrice) || 0,
+    const productData = {
+      title: formData.get("title"),
+      brand: formData.get("brand"),
+      category: formData.get("category"),
+      description: formData.get("description"),
+      stock: formData.get("stock"),
+      price: pricing.price,
+      originalPrice: pricing.originalPrice,
       discountPercent: pricing.discountPercent,
-      stock: Number(data.stock),
-      image: previewImage || (editItem ? editItem.image : "placeholder.png"),
+      image: previewImage,
     };
 
     if (editItem) {
-      updateProduct(editItem.id, payload);
+      updateProduct(editItem.id, productData);
     } else {
-      addProduct(payload);
+      addProduct(productData);
     }
 
+    // Clean up
     setEditItem(null);
-    setPreviewImage("");
+    setPreviewImage(null);
     setPricing({ price: "", originalPrice: "", discountPercent: 0 });
     setActiveTab("products");
   };
 
   return (
-    <div className="flex min-h-screen bg-[#fcfcfd] text-slate-900 font-sans">
-      {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-white border-r p-6 flex-col z-40">
-        <h2 className="text-xl font-black mb-10 text-blue-600 tracking-tighter uppercase">
-          Seller Hub
-        </h2>
-
-        <nav className="space-y-2 flex-1">
-          <TabButton
-            active={activeTab === "dashboard"}
-            onClick={() => setActiveTab("dashboard")}
-            icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
-          />
-
-          <TabButton
-            active={activeTab === "products"}
-            onClick={() => setActiveTab("products")}
-            icon={<Package size={20} />}
-            label="Inventory"
-          />
-
-          <TabButton
-            active={activeTab === "add"}
-            onClick={() => {
-              setEditItem(null);
-              setActiveTab("add");
-            }}
-            icon={<PlusCircle size={20} />}
-            label={editItem ? "Editing..." : "Add Product"}
-          />
-        </nav>
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
+      {/* RESPONSIVE NAVIGATION */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 h-20 bg-white/80 backdrop-blur-md border-t border-slate-200 flex flex-row items-center justify-around md:relative md:h-screen md:w-20 md:flex-col md:border-t-0 md:border-r md:justify-start md:pt-12 md:gap-5">
+        <div className="hidden md:flex mb-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600">
+          <Settings2 size={20} strokeWidth={2.5} />
+        </div>
+        <NavButton
+          active={activeTab === "dashboard"}
+          onClick={() => setActiveTab("dashboard")}
+          icon={<LayoutDashboard />}
+          label="Stats"
+        />
+        <NavButton
+          active={activeTab === "products"}
+          onClick={() => setActiveTab("products")}
+          icon={<Package />}
+          label="Items"
+        />
+        <NavButton
+          active={activeTab === "add"}
+          onClick={() => {
+            setEditItem(null);
+            setPreviewImage(null);
+            setPricing({ price: "", originalPrice: "", discountPercent: 0 });
+            setActiveTab("add");
+          }}
+          icon={<PlusCircle />}
+          label="New"
+        />
 
         <button
           onClick={resetData}
-          className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2"
+          className="hidden md:flex mt-auto mb-10 text-[10px] font-black text-slate-300 hover:text-rose-500 uppercase tracking-tighter"
         >
-          <RotateCcw size={14} /> Reset All Data
+          Reset DB
         </button>
-      </aside>
-
-      {/* MOBILE HEADER */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 bg-white border-b px-4 h-14 flex items-center justify-between">
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Menu size={22} />
-        </button>
-
-        <span className="font-black text-blue-600 uppercase">Seller Hub</span>
-      </header>
-
-      {/* MOBILE OVERLAY */}
-      <div
-        onClick={() => setMobileOpen(false)}
-        className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-300
-          ${mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-      />
-
-      {/* MOBILE DRAWER */}
-      <aside
-        className={`fixed top-14 left-0 z-50 h-[calc(100vh-3.5rem)] w-64 bg-white border-r
-          transform transition-transform duration-300 ease-in-out md:hidden
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="p-6 flex flex-col h-full">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-black text-blue-600 uppercase">
-              Seller Hub
-            </h2>
-            <button onClick={() => setMobileOpen(false)}><X size={20} /></button>
-          </div>
-
-          <nav className="space-y-2 flex-1">
-            <TabButton
-              active={activeTab === "dashboard"}
-              onClick={() => {
-                setActiveTab("dashboard");
-                setMobileOpen(false);
-              }}
-              icon={<LayoutDashboard size={20} />}
-              label="Dashboard"
-            />
-
-            <TabButton
-              active={activeTab === "products"}
-              onClick={() => {
-                setActiveTab("products");
-                setMobileOpen(false);
-              }}
-              icon={<Package size={20} />}
-              label="Inventory"
-            />
-
-            <TabButton
-              active={activeTab === "add"}
-              onClick={() => {
-                setEditItem(null);
-                setActiveTab("add");
-                setMobileOpen(false);
-              }}
-              icon={<PlusCircle size={20} />}
-              label={editItem ? "Editing..." : "Add Product"}
-            />
-          </nav>
-
-          <button
-            onClick={resetData}
-            className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-500 font-bold p-2 mt-auto"
-          >
-            <RotateCcw size={14} /> Reset All Data
-          </button>
-        </div>
-      </aside>
+      </nav>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 md:ml-64 pt-16 md:pt-8 px-4 sm:px-6 lg:px-8">
-        <header className="mb-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black capitalize">
-                {activeTab}
-              </h1>
-
-              <p className="mt-1 text-xs sm:text-sm font-bold text-slate-400">
-                Managing {products.length} Items
-              </p>
-            </div>
-
-            {/* PROFILE DROPDOWN */}
-            <div className="relative" data-dd="seller">
-              <button
-                onClick={() => setMenuOpen((p) => !p)}
-                className="p-2 rounded-xl hover:bg-slate-100 transition"
-              >
-                <User size={22} />
-              </button>
-
-              {menuOpen && (
-               <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg z-50">
-                  <button
-                    onClick={() => {
-                      navigate("/UserProfile");
-                      setMenuOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold flex items-center gap-2"
-                  >
-                    <User size={16} /> Profile
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      navigate("/");
-                      setMenuOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold flex items-center gap-2"
-                  >
-                    <Home size={16} /> Home
-                  </button>
-                </div>
-              )}
-            </div>
+      <main className="flex-1 p-4 sm:p-8 lg:p-12 pb-28 md:pb-12 overflow-y-auto w-full max-w-400 mx-auto">
+        {/* TOP SEARCH BAR - Only shows on Inventory/Dashboard */}
+        {activeTab !== "add" && (
+          <div className="mb-8 relative max-w-md animate-in fade-in slide-in-from-top-2 duration-700">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Search inventory..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white rounded-3xl border border-slate-200 shadow-sm focus:ring-2 ring-indigo-500 outline-none font-bold text-sm transition-all"
+            />
           </div>
-        </header>
-
-        {activeTab === "dashboard" && (
-          <DashboardView
-            products={products}
-            categories={categories}
-            analytics={analytics}
-          />
         )}
 
-        {activeTab === "products" && (
-          <Products1
-            products={products}
-            setEditItem={setEditItem}
-            deleteProduct={deleteProduct}
-            setActiveTab={setActiveTab}
-          />
-        )}
+        <div className="transition-all duration-300">
+          {activeTab === "dashboard" && (
+            <DashboardViewGraph
+              products={products}
+              categories={categories}
+              analytics={analytics}
+            />
+          )}
 
-        {activeTab === "add" && (
-          <AddProduct
-            editItem={editItem}
-            previewImage={previewImage}
-            setPreviewImage={setPreviewImage}
-            pricing={pricing}
-            handlePriceChange={handlePriceChange}
-            handleImageChange={handleImageChange}
-            handleFormSubmit={handleFormSubmit}
-            categories={categories}
-            setEditItem={setEditItem}
-            setActiveTab={setActiveTab}
-          />
-        )}
+          {activeTab === "products" && (
+            <Products1
+              products={filteredProducts}
+              setActiveTab={setActiveTab}
+              deleteProduct={deleteProduct}
+              setEditItem={(item) => {
+                setEditItem(item);
+                setPricing({
+                  price: item.price,
+                  originalPrice: item.originalPrice || item.price,
+                  discountPercent: item.discountPercent,
+                });
+                setPreviewImage(item.image);
+                setActiveTab("add");
+              }}
+            />
+          )}
+
+          {activeTab === "add" && (
+            <AddProduct
+              editItem={editItem}
+              previewImage={previewImage}
+              pricing={pricing}
+              handlePriceChange={handlePriceChange}
+              handleImageChange={handleImageChange}
+              handleFormSubmit={handleFormSubmit}
+              categories={categories}
+              setActiveTab={setActiveTab}
+            />
+          )}
+        </div>
       </main>
     </div>
   );
 };
 
-// HELPERS
-const TabButton = ({ active, onClick, icon, label }) => (
+const NavButton = ({ active, icon, onClick, label }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 p-3 rounded-xl font-bold transition-all ${
-      active ? "bg-blue-50 text-blue-600 shadow-sm" : "text-slate-400 hover:bg-slate-50"
-    }`}
+    className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all duration-300 group
+      ${
+        active
+          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-110"
+          : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50"
+      }`}
   >
-    {icon} {label}
+    {React.cloneElement(icon, { size: 26, strokeWidth: active ? 2.5 : 2 })}
+    <span
+      className={`text-[9px] font-black uppercase mt-1.5 md:hidden ${active ? "opacity-100" : "opacity-60"}`}
+    >
+      {label}
+    </span>
   </button>
 );
 

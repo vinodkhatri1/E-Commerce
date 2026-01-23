@@ -15,7 +15,10 @@ const Products1 = ({ products, setEditItem, deleteProduct, setActiveTab }) => {
           </thead>
           <tbody className="divide-y">
             {products.map((product) => (
-              <tr key={product.id} className="hover:bg-slate-50 transition group">
+              <tr
+                key={product.id}
+                className="hover:bg-slate-50 transition group"
+              >
                 <td className="p-4 w-20">
                   <img
                     src={

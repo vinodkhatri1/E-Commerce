@@ -25,7 +25,7 @@ const Stars = ({ rating, size = 16 }) => {
             <Star
               key={star}
               size={size}
-              className="text-gray-200 fill-gray-100" // Made empty stars lighter
+              className="text-gray-200 fill-gray-100"
             />
           );
         }

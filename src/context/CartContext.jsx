@@ -2,16 +2,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 const CART_KEY = "cart_items";
-const WISHLIST_KEY = "wishlist_items"; // NEW
+const WISHLIST_KEY = "wishlist_items";
 
 export const CartProvider = ({ children }) => {
-  // --- Cart State ---
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem(CART_KEY);
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // --- Wishlist State (NEW) ---
   const [wishlist, setWishlist] = useState(() => {
     const savedWishlist = localStorage.getItem(WISHLIST_KEY);
     return savedWishlist ? JSON.parse(savedWishlist) : [];
@@ -23,12 +21,10 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
 
-  // Sync Wishlist to LocalStorage (NEW)
   useEffect(() => {
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
   }, [wishlist]);
 
-  // --- Cart Functions ---
   const addToCart = (product) => {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === product.id);
@@ -62,7 +58,6 @@ export const CartProvider = ({ children }) => {
     localStorage.removeItem(CART_KEY);
   };
 
-  // --- Wishlist Functions (NEW) ---
   const toggleWishlist = (product) => {
     setWishlist((prev) => {
       const isExist = prev.find((item) => item.id === product.id);
@@ -89,7 +84,6 @@ export const CartProvider = ({ children }) => {
         isCartOpen,
         openCart,
         closeCart,
-        // New Values
         wishlist,
         toggleWishlist,
         isInWishlist,

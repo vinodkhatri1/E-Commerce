@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Added Link
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-// Removed DetailedOrderCard import
 import {
   Clock,
   Trash2,
@@ -15,8 +14,8 @@ import {
   Loader2,
   AlertTriangle,
   LogOut,
-  Package, // Added Package icon
-  ChevronRight, // Added Chevron
+  Package,
+  ChevronRight,
 } from "lucide-react";
 
 const UserProfile = () => {
@@ -24,8 +23,6 @@ const UserProfile = () => {
   const { cart, addToCart, decreaseQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
 
-  // Removed orders state since we load them on the other page now
-  // We can keep a simple count if we want, but let's keep it clean
   const [orderCount, setOrderCount] = useState(0);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -44,7 +41,6 @@ const UserProfile = () => {
   useEffect(() => {
     if (user?.email) {
       const savedAddress = localStorage.getItem(`address_${user.email}`);
-      // Just check existence of orders for count
       const savedOrders = localStorage.getItem(`orders_${user.email}`);
 
       if (savedOrders) setOrderCount(JSON.parse(savedOrders).length);
@@ -57,7 +53,6 @@ const UserProfile = () => {
     }
   }, [user]);
 
-  // --- DELETE ACCOUNT LOGIC ---
   const handleDeleteAccount = () => {
     if (!user?.email) return;
 
@@ -122,9 +117,7 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN */}
         <aside className="lg:col-span-4 space-y-6">
-          {/* Avatar Card */}
           <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 text-center">
             <img
               src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name || "User"}&backgroundColor=2563eb`}
@@ -142,7 +135,6 @@ const UserProfile = () => {
             </button>
           </div>
 
-          {/* NEW: Navigation Card to Order History */}
           <Link to="/orders" className="block group">
             <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 group-hover:border-blue-300 transition-all group-hover:shadow-md">
               <div className="flex justify-between items-center mb-2">
@@ -175,7 +167,6 @@ const UserProfile = () => {
             </div>
           </Link>
 
-          {/* DANGER ZONE */}
           <div className="bg-red-50/50 rounded-4xl p-6 border border-red-100">
             <h3 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2">
               <AlertTriangle size={14} /> Danger Zone
@@ -211,9 +202,7 @@ const UserProfile = () => {
           </div>
         </aside>
 
-        {/* RIGHT COLUMN (Same Form & Bag) */}
         <main className="lg:col-span-8 space-y-6">
-          {/* Shipping Form */}
           <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200 relative">
             <div className="flex justify-between items-start mb-8">
               <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3 uppercase">
@@ -316,7 +305,6 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* Cart Section */}
           <div className="space-y-4 pt-4">
             <h2 className="text-xl font-black text-slate-900 px-2 tracking-tight uppercase flex items-center justify-between">
               Current Bag

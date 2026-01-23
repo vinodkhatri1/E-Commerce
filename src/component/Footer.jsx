@@ -57,7 +57,13 @@ const Footer = () => {
                 (link) => (
                   <li key={link}>
                     <Link
-                      to="#"
+                      to={
+                        link === "All Products"
+                          ? "/products"
+                          : link === "Categories"
+                            ? "/categories"
+                            : "/#"
+                      }
                       className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors"
                     >
                       {link}

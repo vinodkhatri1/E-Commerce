@@ -5,7 +5,6 @@ const Banner = () => {
   return (
     <div className="p-4 sm:p-5">
       <div className="container mx-auto flex flex-col-reverse md:flex-row bg-[#e3edf6] min-h-100 w-full rounded-xl overflow-hidden">
-        
         {/* Image Section */}
         <div className="w-full md:w-1/2 flex relative">
           <img

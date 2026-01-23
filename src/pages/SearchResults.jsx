@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import ProductData from "../Data/ProductData";
-import ProductCard from "../component/ProductCard"; // Adjust this path to where your ProductCard is saved
+import ProductCard from "../component/ProductCard";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -20,7 +20,6 @@ const SearchResults = () => {
         );
       });
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredProducts(results);
     } else {
       setFilteredProducts([]);

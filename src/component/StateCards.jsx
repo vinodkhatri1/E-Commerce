@@ -1,4 +1,3 @@
-// src/components/StatCard.jsx
 const StatCard = ({ label, val, icon, color }) => (
   <div className="bg-white p-6 rounded-3xl border border-slate-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
     <div className={`p-4 rounded-2xl ${color} shadow-sm`}>{icon}</div>

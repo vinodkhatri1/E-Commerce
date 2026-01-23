@@ -15,6 +15,8 @@ import {
   MapPin,
   Mail,
   Phone,
+  House,
+  Home,
 } from "lucide-react";
 
 // --- CONTEXT & DATA ---
@@ -30,11 +32,9 @@ import LogIn from "./LogIn";
 const Header = () => {
   const navigate = useNavigate();
 
-  // Auth & Cart Contexts
   const { user, isLoginOpen, openLogin, closeLogin, logout } = useAuth();
   const { cart, isCartOpen, openCart, closeCart, wishlist } = useCart();
 
-  // State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCat, setSelectedCat] = useState("All");
@@ -45,12 +45,10 @@ const Header = () => {
   const searchContainerRef = useRef(null);
   const userMenuRef = useRef(null);
 
-  // Dynamic Category Extraction
   const dynamicCategories = [
     ...new Set(ProductData?.map((p) => p.category) || []),
   ];
 
-  // --- Close dropdowns on click outside ---
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -103,10 +101,10 @@ const Header = () => {
         <div className="max-w-360 mx-auto px-6 py-2 flex justify-between items-center text-[11px] font-black text-gray-500 uppercase tracking-[0.15em]">
           <div className="flex items-center gap-6">
             <a
-              href="tel:+14694225944"
+              href="tel:+146942***44"
               className="hover:text-indigo-600 transition-colors flex items-center gap-2"
             >
-              <Phone size={12} className="text-indigo-500" /> +1 (469) 422-5944
+              <Phone size={12} className="text-indigo-500" /> +1 (469) 42*-**44
             </a>
             <a
               href="mailto:info@store.com"
@@ -227,6 +225,11 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="flex items-center gap-2 sm:gap-4 order-3">
+            <div>
+              <Link to="/" className="shrink-0 order-1">
+                <Home />
+              </Link>
+            </div>
             <Link to="/wishlist" className="relative p-2">
               <Heart size={22} />
               {wishlist.length > 0 && (
@@ -235,7 +238,6 @@ const Header = () => {
                 </span>
               )}
             </Link>
-
             <div
               onClick={openCart}
               className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full cursor-pointer transition-colors"
@@ -344,27 +346,35 @@ const Header = () => {
             >
               <Menu size={14} /> All Categories
             </button>
-            <Link
-              to="/shop"
-              className="hover:text-indigo-400 transition-colors shrink-0"
-            >
-              Best Sellers
-            </Link>
-            <Link
-              to="/deals"
-              className="hover:text-indigo-400 transition-colors shrink-0"
-            >
-              Today's Deals
-            </Link>
-            {dynamicCategories.slice(0, 5).map((cat) => (
+            <div className="flex gap-6 items-center md:ml-41">
               <Link
-                key={cat}
-                to={`/category/${cat}`}
-                className="hover:text-indigo-400 transition-colors shrink-0 capitalize"
+                to="/shop"
+                className="hover:text-indigo-400 transition-colors shrink-0"
               >
-                {cat}
+                Best Sellers
               </Link>
-            ))}
+              <Link
+                to="/deals"
+                className="hover:text-indigo-400 transition-colors shrink-0"
+              >
+                Today's Deals
+              </Link>
+              <Link
+                to="/products"
+                className="hover:text-indigo-400 transition-colors shrink-0"
+              >
+                All Products
+              </Link>
+              {dynamicCategories.slice(0, 5).map((cat) => (
+                <Link
+                  key={cat}
+                  to={`/category/${cat}`}
+                  className="hover:text-indigo-400 transition-colors shrink-0 capitalize"
+                >
+                  {cat}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </header>
