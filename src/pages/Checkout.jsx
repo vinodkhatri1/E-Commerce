@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { MapPin, CreditCard, ArrowRight, Banknote } from "lucide-react";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import CreditCard from "lucide-react/dist/esm/icons/credit-card";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Banknote from "lucide-react/dist/esm/icons/banknote";
 
 import InputField from "../component/InputField";
 import OrderSummary from "../component/OrderSummary";

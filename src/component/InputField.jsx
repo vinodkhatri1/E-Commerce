@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle } from "lucide-react";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 
 const InputField = ({
   label,

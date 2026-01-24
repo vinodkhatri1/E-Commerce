@@ -1,4 +1,6 @@
-import { X, ArrowRight, Lock } from "lucide-react";
+import X from "lucide-react/dist/esm/icons/x";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Lock from "lucide-react/dist/esm/icons/lock";
 import CartCard from "./CartCard";
 import EmptyBaskat from "../assets/EmptyCart.png";
 import { useCart } from "../context/CartContext";

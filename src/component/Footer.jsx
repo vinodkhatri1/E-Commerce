@@ -1,6 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Github, Mail } from "lucide-react";
+import Facebook from "lucide-react/dist/esm/icons/facebook";
+import Instagram from "lucide-react/dist/esm/icons/instagram";
+import Twitter from "lucide-react/dist/esm/icons/twitter";
+import Github from "lucide-react/dist/esm/icons/github";
+import Mail from "lucide-react/dist/esm/icons/mail";
 
 // Replace this path with your actual logo file path (e.g., /assets/logo.png)
 import myLogo from "../assets/logo.png";

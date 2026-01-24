@@ -1,23 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  User,
-  ShoppingCart,
-  Search,
-  Menu,
-  X,
-  ChevronDown,
-  ChevronRight,
-  Heart,
-  LogOut,
-  LayoutDashboard,
-  Package,
-  MapPin,
-  Mail,
-  Phone,
-  House,
-  Home,
-} from "lucide-react";
+import User from "lucide-react/dist/esm/icons/user";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Search from "lucide-react/dist/esm/icons/search";
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Package from "lucide-react/dist/esm/icons/package";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Home from "lucide-react/dist/esm/icons/home";
 
 // --- CONTEXT & DATA ---
 import { useCart } from "../context/CartContext";
@@ -31,24 +34,29 @@ import LogIn from "./LogIn";
 
 const Header = () => {
   const navigate = useNavigate();
-
   const { user, isLoginOpen, openLogin, closeLogin, logout } = useAuth();
   const { cart, isCartOpen, openCart, closeCart, wishlist } = useCart();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Search State
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState(""); // New state for performance
   const [selectedCat, setSelectedCat] = useState("All");
-  const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const searchContainerRef = useRef(null);
   const userMenuRef = useRef(null);
 
-  const dynamicCategories = [
-    ...new Set(ProductData?.map((p) => p.category) || []),
-  ];
+  // --- PERFORMANCE: Memoize Categories ---
+  // Only recalculate if ProductData actually changes
+  const dynamicCategories = useMemo(() => {
+    return [...new Set(ProductData?.map((p) => p.category) || [])];
+  }, []);
 
+  // --- PERFORMANCE: Click Outside Logic ---
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -61,44 +69,62 @@ const Header = () => {
         setIsUserDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    // Passive listener for better scrolling performance
+    document.addEventListener("mousedown", handleClickOutside, {
+      passive: true,
+    });
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- Search Logic ---
+  // --- PERFORMANCE: Debounce Search Input ---
+  // Wait 300ms after user stops typing to update the term used for filtering
   useEffect(() => {
-    if (searchTerm.trim().length > 0) {
-      const filtered = ProductData.filter((p) => {
-        const matchesTerm = p.title
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesCategory =
-          selectedCat === "All" || p.category === selectedCat;
-        return matchesTerm && matchesCategory;
-      }).slice(0, 5);
-      setSuggestions(filtered);
-    } else {
-      setSuggestions([]);
-    }
-  }, [searchTerm, selectedCat]);
+    const timer = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 300);
 
-  const handleSearchSubmit = (e, termOverride) => {
-    if (e) e.preventDefault();
-    const term = termOverride || searchTerm;
-    if (term.trim()) {
-      const catParam =
-        selectedCat !== "All"
-          ? `&category=${encodeURIComponent(selectedCat)}`
-          : "";
-      navigate(`/search?q=${encodeURIComponent(term.trim())}${catParam}`);
-      setShowSuggestions(false);
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // --- PERFORMANCE: Memoized Filter Logic ---
+  // Runs only when debouncedTerm or selectedCat changes, not on every keystroke
+  const suggestions = useMemo(() => {
+    if (debouncedTerm.trim().length === 0) return [];
+
+    const lowerTerm = debouncedTerm.toLowerCase();
+
+    return ProductData.filter((p) => {
+      const matchesTerm = p.title.toLowerCase().includes(lowerTerm);
+      const matchesCategory =
+        selectedCat === "All" || p.category === selectedCat;
+      return matchesTerm && matchesCategory;
+    }).slice(0, 5);
+  }, [debouncedTerm, selectedCat]);
+
+  // --- PERFORMANCE: Memoized Submit Handler ---
+  const handleSearchSubmit = useCallback(
+    (e, termOverride) => {
+      if (e) e.preventDefault();
+
+      const term = termOverride || searchTerm;
+
+      if (term.trim()) {
+        const catParam =
+          selectedCat !== "All"
+            ? `&category=${encodeURIComponent(selectedCat)}`
+            : "";
+
+        navigate(`/search?q=${encodeURIComponent(term.trim())}${catParam}`);
+        setShowSuggestions(false);
+      }
+    },
+    [searchTerm, selectedCat, navigate],
+  );
 
   return (
     <>
       <div className="bg-gray-50 border-b border-gray-100 hidden lg:block font-sans">
-        <div className="max-w-360 mx-auto px-6 py-2 flex justify-between items-center text-[11px] font-black text-gray-500 uppercase tracking-[0.15em]">
+        <div className="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center text-[11px] font-black text-gray-500 uppercase tracking-[0.15em]">
           <div className="flex items-center gap-6">
             <a
               href="tel:+146942***44"
@@ -135,15 +161,21 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <header className="sticky top-0 z-100 bg-white border-b border-gray-100 shadow-sm">
+
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         {/* --- 1. Main Navigation Row --- */}
-        <div className="max-w-360 mx-auto px-4 py-3 md:py-0 md:h-20 flex items-center justify-between gap-x-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 md:py-0 md:h-20 flex items-center justify-between gap-x-4">
           {/* Logo */}
           <Link to="/" className="shrink-0 order-1">
-            <img className="h-15 md:h-18 w-auto" src={logo} alt="Logo" />
+            <img
+              className="h-15 md:h-18 w-auto"
+              src={logo}
+              alt="Logo"
+              loading="eager"
+            />
           </Link>
 
-          {/* Search Bar - Hidden on small mobile, visible on tablet/desktop */}
+          {/* Search Bar */}
           <div
             className="hidden md:block flex-1 max-w-2xl relative order-2"
             ref={searchContainerRef}
@@ -156,10 +188,7 @@ const Header = () => {
                 <select
                   value={selectedCat}
                   onChange={(e) => setSelectedCat(e.target.value)}
-                  aria-label="Select Category"
-                  className="appearance-none bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 
-               pl-4 pr-10 py-3 rounded-l-lg border-r border-gray-200 outline-none 
-               cursor-pointer h-full transition-colors capitalize truncate max-w-37.5"
+                  className="appearance-none bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 pl-4 pr-10 py-3 rounded-l-lg border-r border-gray-200 outline-none cursor-pointer h-full transition-colors capitalize truncate max-w-37.5"
                 >
                   <option value="All">All Categories</option>
                   {dynamicCategories.map((cat) => (
@@ -168,8 +197,6 @@ const Header = () => {
                     </option>
                   ))}
                 </select>
-
-                {/* Custom Arrow Icon Overlay */}
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                   <ChevronDown size={14} strokeWidth={3} />
                 </div>
@@ -193,7 +220,7 @@ const Header = () => {
 
             {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-110">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-50">
                 {suggestions.map((p) => (
                   <div
                     key={p.id}
@@ -208,6 +235,7 @@ const Header = () => {
                       }
                       className="w-10 h-10 object-contain shrink-0"
                       alt=""
+                      loading="lazy"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-800 truncate">
@@ -277,7 +305,7 @@ const Header = () => {
 
               {/* Account Dropdown */}
               {user && isUserDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 w-56 overflow-hidden z-120 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 w-56 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
                   <div className="p-4 bg-gray-50 border-b border-gray-100">
                     <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
                       Account
@@ -321,7 +349,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* --- 2. Mobile Only Search (Visible on small screens) --- */}
+        {/* --- 2. Mobile Only Search --- */}
         <div className="md:hidden px-4 pb-3">
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
@@ -339,14 +367,14 @@ const Header = () => {
 
         {/* --- 3. Category Bar --- */}
         <div className="bg-slate-900 text-white text-[11px] font-bold">
-          <div className="max-w-360 mx-auto px-4 flex items-center gap-6 py-2.5 overflow-x-auto no-scrollbar whitespace-nowrap uppercase tracking-wider">
+          <div className="max-w-7xl mx-auto px-4 flex items-center gap-6 py-2.5 overflow-x-auto no-scrollbar whitespace-nowrap uppercase tracking-wider">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="flex items-center gap-2 hover:text-indigo-400 transition-colors shrink-0"
             >
               <Menu size={14} /> All Categories
             </button>
-            <div className="flex gap-6 items-center md:ml-41">
+            <div className="flex gap-6 items-center md:ml-40">
               <Link
                 to="/shop"
                 className="hover:text-indigo-400 transition-colors shrink-0"
@@ -381,11 +409,11 @@ const Header = () => {
 
       {/* --- MOBILE SIDEBAR --- */}
       <div
-        className={`fixed inset-0 bg-black/60 z-200 transi tion-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 bg-black/60 z-100 transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsMobileMenuOpen(false)}
       />
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-white z-201 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-72 bg-white z-101 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* FIXED SIDEBAR HEADER */}
         <div className="bg-slate-800 text-white p-6 flex items-center gap-4">
@@ -419,7 +447,7 @@ const Header = () => {
         </div>
 
         {/* Sidebar Content */}
-        <div className="flex flex-col h-11/12 bg-white">
+        <div className="flex flex-col h-[calc(100%-88px)] bg-white">
           <div className="flex-1 overflow-y-auto p-5">
             <h3 className="text-gray-400 hover:text-blue-600 text-[12px] font-black uppercase tracking-[0.2em] ml-3 mb-4 sticky top-0 bg-white pb-2 z-10">
               <Link to="/categories">Shop Categories</Link>
@@ -446,7 +474,6 @@ const Header = () => {
             >
               <User size={18} /> Your Account
             </Link>
-
             <Link
               to="/orders"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -454,7 +481,6 @@ const Header = () => {
             >
               <Package size={18} /> Returns & Orders
             </Link>
-
             {user && (
               <button
                 onClick={() => {
@@ -473,7 +499,7 @@ const Header = () => {
       {/* --- Modals --- */}
       {isCartOpen && <Cart setIsOpenCart={closeCart} />}
       {isLoginOpen && (
-        <div className="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
           <LogIn onClose={closeLogin} />
         </div>
       )}

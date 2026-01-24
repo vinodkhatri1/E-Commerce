@@ -1,4 +1,6 @@
-import { CirclePlus, CircleMinus, Trash2 } from "lucide-react";
+import CirclePlus from "lucide-react/dist/esm/icons/circle-plus";
+import CircleMinus from "lucide-react/dist/esm/icons/circle-minus";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import { useCart } from "../context/CartContext";
 
 const CartCard = ({ item }) => {

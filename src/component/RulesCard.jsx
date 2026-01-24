@@ -1,4 +1,4 @@
-import { Truck } from "lucide-react";
+import Truck from "lucide-react/dist/esm/icons/truck";
 
 const RulesCard = ({ icon, title, description, index }) => {
   const IconComponent = icon || Truck;

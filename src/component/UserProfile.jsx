@@ -2,21 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import {
-  Clock,
-  Trash2,
-  ArrowRight,
-  Plus,
-  Minus,
-  CheckCircle,
-  MapPin,
-  Save,
-  Loader2,
-  AlertTriangle,
-  LogOut,
-  Package,
-  ChevronRight,
-} from "lucide-react";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Save from "lucide-react/dist/esm/icons/save";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Package from "lucide-react/dist/esm/icons/package";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 
 const UserProfile = () => {
   const { user, logout } = useAuth();

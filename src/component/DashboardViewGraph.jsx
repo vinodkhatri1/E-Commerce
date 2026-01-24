@@ -1,5 +1,7 @@
-import React from "react";
-import { DollarSign, AlertTriangle, TrendingUp } from "lucide-react";
+import React, { useMemo } from "react";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import {
   ResponsiveContainer,
   XAxis,
@@ -15,46 +17,62 @@ import {
 } from "recharts";
 import StatCard from "../component/StateCards";
 
+// --- PERFORMANCE: Static Data Moved Outside ---
+// Keeping these outside prevents memory reallocation on every render
+const DUMMY_CHART_DATA = [
+  { name: "Jan", value: 400 },
+  { name: "Feb", value: 600 },
+  { name: "Mar", value: 300 },
+  { name: "Apr", value: 500 },
+  { name: "May", value: 550 },
+  { name: "Jun", value: 400 },
+  { name: "Jul", value: 350 },
+  { name: "Aug", value: 450 },
+  { name: "Sep", value: 650 },
+  { name: "Oct", value: 380 },
+  { name: "Nov", value: 500 },
+  { name: "Dec", value: 100 },
+];
+
+const DUMMY_BAR_DATA = [
+  { name: "Jan", val: 40 },
+  { name: "Feb", val: 80 },
+  { name: "Mar", val: 30 },
+  { name: "Apr", val: 50 },
+  { name: "May", val: 90 },
+  { name: "Jun", val: 70 },
+  { name: "Jul", val: 20 },
+  { name: "Aug", val: 60 },
+];
+
+const ALL_COUNTRIES = [
+  { name: "Turkey", sales: "6,972" },
+  { name: "Belgium", sales: "2,410" },
+  { name: "Sweden", sales: "1,972" },
+  { name: "Vietnam", sales: "850" },
+  { name: "Australia", sales: "600" },
+];
+
+const PIE_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#f43f5e"];
+
 const DashboardViewGraph = ({ products, categories, analytics }) => {
-  // Data Logic
-  const dummyChartData = [
-    { name: "Jan", value: 400 },
-    { name: "Feb", value: 600 },
-    { name: "Mar", value: 300 },
-    { name: "Apr", value: 500 },
-    { name: "May", value: 550 },
-    { name: "Jun", value: 400 },
-    { name: "Jul", value: 350 },
-    { name: "Aug", value: 450 },
-    { name: "Sep", value: 650 },
-    { name: "Oct", value: 380 },
-    { name: "Nov", value: 500 },
-    { name: "Dec", value: 100 },
-  ];
+  // --- PERFORMANCE: Memoized Calculations ---
+  // Only recalculate pie data if products or categories change
+  const pieData = useMemo(() => {
+    return categories.map((cat) => ({
+      name: cat,
+      value: products.filter((p) => p.category === cat).length,
+    }));
+  }, [categories, products]);
 
-  const dummyBarData = [
-    { name: "Jan", val: 40 },
-    { name: "Feb", val: 80 },
-    { name: "Mar", val: 30 },
-    { name: "Apr", val: 50 },
-    { name: "May", val: 90 },
-    { name: "Jun", val: 70 },
-    { name: "Jul", val: 20 },
-    { name: "Aug", val: 60 },
-  ];
-
-  const allCountries = [
-    { name: "Turkey", sales: "6,972" },
-    { name: "Belgium", sales: "2,410" },
-    { name: "Sweden", sales: "1,972" },
-    { name: "Vietnam", sales: "850" },
-    { name: "Australia", sales: "600" },
-  ];
+  // Only re-slice if products array changes
+  const topInventoryData = useMemo(() => {
+    return products.slice(0, 6);
+  }, [products]);
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* 1. STAT CARDS GRID */}
-      {/* Stacks on mobile, 3 columns on tablet+ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <StatCard
           label="Total Value"
@@ -93,11 +111,10 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
           </select>
         </div>
 
-        {/* Dynamic Height: Smaller on mobile, taller on desktop */}
         <div className="h-48 sm:h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={dummyChartData}
+              data={DUMMY_CHART_DATA}
               margin={{ top: 5, right: 0, left: -20, bottom: 0 }}
             >
               <XAxis
@@ -134,7 +151,6 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
       </div>
 
       {/* 3. MIDDLE ROW (Pie + Bar) */}
-      {/* 1 Column on Mobile/Tablet, 2 Columns on Desktop (lg) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* STOCK DISTRIBUTION */}
         <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
@@ -145,21 +161,16 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={categories.map((cat) => ({
-                    name: cat,
-                    value: products.filter((p) => p.category === cat).length,
-                  }))}
+                  data={pieData}
                   innerRadius={60}
                   outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {categories.map((entry, index) => (
+                  {pieData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={
-                        ["#6366f1", "#10b981", "#f59e0b", "#f43f5e"][index % 4]
-                      }
+                      fill={PIE_COLORS[index % PIE_COLORS.length]}
                     />
                   ))}
                 </Pie>
@@ -177,7 +188,7 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
           <div className="flex-1 min-h-50">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={products.slice(0, 6)}
+                data={topInventoryData}
                 layout="vertical"
                 margin={{ left: -20 }}
               >
@@ -220,7 +231,7 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
           </div>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dummyBarData}>
+              <BarChart data={DUMMY_BAR_DATA}>
                 <XAxis
                   dataKey="name"
                   axisLine={false}
@@ -245,7 +256,7 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
             Global Sales
           </h3>
           <div className="space-y-3">
-            {allCountries.map((country, i) => (
+            {ALL_COUNTRIES.map((country, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between group hover:bg-slate-50 p-2 rounded-lg transition-colors -mx-2"
@@ -270,4 +281,5 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
   );
 };
 
-export default DashboardViewGraph;
+// --- PERFORMANCE: Prevent Unnecessary Re-renders ---
+export default React.memo(DashboardViewGraph);

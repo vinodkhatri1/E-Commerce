@@ -1,4 +1,5 @@
-import { Edit, Trash2 } from "lucide-react";
+import Edit from "lucide-react/dist/esm/icons/edit";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 
 const SellerDashboardProduct = ({
   products,
@@ -7,7 +8,7 @@ const SellerDashboardProduct = ({
   setActiveTab,
 }) => {
   return (
-    <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden animate-in fade-in">
+    <div className="bg-white rounded-4xl shadow-sm overflow-hidden animate-in fade-in">
       <div className="hidden md:block">
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 border-b">
@@ -86,7 +87,7 @@ const SellerDashboardProduct = ({
                   ? product.image
                   : `/image/${product.category}/${product.image}`
               }
-              className="w-14 h-14 rounded-xl object-cover bg-slate-100 flex-shrink-0"
+              className="w-14 h-14 rounded-xl object-cover bg-slate-100 shrink-0"
               onError={(e) => (e.target.src = "https://placehold.co/100")}
             />
 

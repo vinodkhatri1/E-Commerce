@@ -1,5 +1,8 @@
 import React from "react";
-import { Save, PlusCircle, ImageIcon, Tag } from "lucide-react";
+import Save from "lucide-react/dist/esm/icons/save";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import ImageIcon from "lucide-react/dist/esm/icons/image";
+import Tag from "lucide-react/dist/esm/icons/tag";
 
 const SellerDashboardAddProduct = ({
   editItem,
@@ -108,7 +111,7 @@ const SellerDashboardAddProduct = ({
           </div>
         </div>
 
-        <div className="bg-slate-50 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 group hover:border-indigo-400 transition-all">
+        <div className="bg-slate-50 p-6 rounded-4xl border-2 border-dashed border-slate-200 group hover:border-indigo-400 transition-all">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="w-32 h-32 bg-white rounded-2xl border flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
               {previewImage ? (
@@ -144,7 +147,7 @@ const SellerDashboardAddProduct = ({
         <div className="pt-6 flex flex-col sm:flex-row gap-4">
           <button
             type="submit"
-            className="flex-[2] bg-slate-900 text-white font-black p-5 rounded-2xl hover:bg-indigo-600 shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+            className="flex-2 bg-slate-900 text-white font-black p-5 rounded-2xl hover:bg-indigo-600 shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95"
           >
             {editItem ? <Save size={18} /> : <PlusCircle size={18} />}
             {editItem ? "UPDATE PRODUCT" : "PUBLISH LISTING"}

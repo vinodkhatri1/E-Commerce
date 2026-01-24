@@ -1,5 +1,8 @@
 import RulesCard from "./RulesCard";
-import { Truck, CircleDollarSign, BadgePercent, Headset } from "lucide-react";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import CircleDollarSign from "lucide-react/dist/esm/icons/circle-dollar-sign";
+import BadgePercent from "lucide-react/dist/esm/icons/badge-percent";
+import Headset from "lucide-react/dist/esm/icons/headset";
 
 const ContainerRules = () => {
   const rules = [
