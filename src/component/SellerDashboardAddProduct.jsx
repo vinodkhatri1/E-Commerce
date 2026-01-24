@@ -1,7 +1,7 @@
 import React from "react";
 import { Save, PlusCircle, ImageIcon, Tag } from "lucide-react";
 
-const AddProduct = ({
+const SellerDashboardAddProduct = ({
   editItem,
   previewImage,
   pricing,
@@ -177,4 +177,4 @@ const Input = ({ label, ...props }) => (
   </div>
 );
 
-export default AddProduct;
+export default SellerDashboardAddProduct;

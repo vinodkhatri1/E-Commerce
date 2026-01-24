@@ -1,6 +1,11 @@
 import { Edit, Trash2 } from "lucide-react";
 
-const Products1 = ({ products, setEditItem, deleteProduct, setActiveTab }) => {
+const SellerDashboardProduct = ({
+  products,
+  setEditItem,
+  deleteProduct,
+  setActiveTab,
+}) => {
   return (
     <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden animate-in fade-in">
       <div className="hidden md:block">
@@ -127,4 +132,4 @@ const Products1 = ({ products, setEditItem, deleteProduct, setActiveTab }) => {
   );
 };
 
-export default Products1;
+export default SellerDashboardProduct;

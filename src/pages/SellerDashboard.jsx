@@ -9,8 +9,8 @@ import {
 import { useProducts } from "../context/productContext";
 
 import DashboardViewGraph from "../component/DashboardViewGraph";
-import Products1 from "../component/Products1";
-import AddProduct from "../component/AddProduct";
+import SellerDashboardProduct from "../component/SellerDashboardProduct";
+import SellerDashboardAddProduct from "../component/SellerDashboardAddProduct";
 
 const SellerDashboard = () => {
   const {
@@ -182,7 +182,7 @@ const SellerDashboard = () => {
           )}
 
           {activeTab === "products" && (
-            <Products1
+            <SellerDashboardProduct
               products={filteredProducts}
               setActiveTab={setActiveTab}
               deleteProduct={deleteProduct}
@@ -200,7 +200,7 @@ const SellerDashboard = () => {
           )}
 
           {activeTab === "add" && (
-            <AddProduct
+            <SellerDashboardAddProduct
               editItem={editItem}
               previewImage={previewImage}
               pricing={pricing}

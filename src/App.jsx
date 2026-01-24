@@ -8,7 +8,6 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Product from "./pages/Product";
 import { useEffect } from "react";
-import AddSellProduct from "./pages/AddSellProduct";
 import SellerDashboard from "./pages/SellerDashboard";
 import SearchResults from "./pages/SearchResults";
 import Checkout from "./pages/Checkout";
@@ -38,11 +37,6 @@ const App = () => {
               <Route path="/category/:category" element={<Category />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<Product />} />
-              <Route
-                path="/AddSellProduct"
-                AddSellProduct
-                element={<AddSellProduct />}
-              />
               <Route path="/seller-dashboard" element={<SellerDashboard />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/checkout" element={<Checkout />} />
