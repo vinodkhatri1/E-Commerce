@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter, Github, Mail } from "lucide-react";
 
+// Replace this path with your actual logo file path (e.g., /assets/logo.png)
 import myLogo from "../assets/logo.png";
 
 const Footer = () => {
@@ -9,15 +10,19 @@ const Footer = () => {
 
   return (
     <footer className="bg-white border-t border-slate-100 mt-20">
+      {/* 2. Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Brand Section with your Logo */}
         <div className="lg:col-span-4 space-y-8">
           <Link to="/" className="inline-block">
+            {/* If you have an image logo */}
             <img
               src={myLogo}
               alt="Store Logo"
               className="h-16 w-auto object-contain"
-              onError={(e) => (e.target.style.display = "none")}
+              onError={(e) => (e.target.style.display = "none")} // Hides if image fails
             />
+            {/* Fallback Text Logo if image is missing */}
             <span className="text-2xl font-black tracking-tighter text-slate-900">
               STORE<span className="text-blue-600">.</span>
             </span>
@@ -41,6 +46,7 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Links Sections */}
         <div className="lg:col-span-4 grid grid-cols-2 gap-8">
           <div className="space-y-6">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
@@ -91,6 +97,7 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Newsletter Section */}
         <div className="lg:col-span-4">
           <div className="bg-slate-900 p-8 rounded-4xl text-white shadow-xl shadow-blue-900/10">
             <h4 className="text-lg font-black tracking-tight mb-2">
@@ -112,6 +119,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* 3. Bottom Bar */}
       <div className="border-t border-slate-50 py-10 px-6 bg-slate-50/30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">
