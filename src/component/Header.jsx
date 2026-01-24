@@ -315,18 +315,27 @@ const Header = () => {
                   <Link
                     to="/UserProfile"
                     className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                    onClick={() => {
+                      setIsUserDropdownOpen(false);
+                    }}
                   >
                     <User size={16} /> My Profile
                   </Link>
                   <Link
                     to="/orders"
                     className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                    onClick={() => {
+                      setIsUserDropdownOpen(false);
+                    }}
                   >
                     <Package size={16} /> Orders
                   </Link>
                   <Link
                     to="/seller-dashboard"
                     className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                    onClick={() => {
+                      setIsUserDropdownOpen(false);
+                    }}
                   >
                     <LayoutDashboard size={16} /> Dashboard
                   </Link>
@@ -449,7 +458,7 @@ const Header = () => {
         {/* Sidebar Content */}
         <div className="flex flex-col h-[calc(100%-88px)] bg-white">
           <div className="flex-1 overflow-y-auto p-5">
-            <h3 className="text-gray-400 hover:text-blue-600 text-[12px] font-black uppercase tracking-[0.2em] ml-3 mb-4 sticky top-0 bg-white pb-2 z-10">
+            <h3 className="text-gray-400 hover:text-blue-600 text-[12px] font-black uppercase tracking-[0.2em] ml-3 mb-4 bg-white pb-2">
               <Link to="/categories">Shop Categories</Link>
             </h3>
             <div className="space-y-1 pb-4">
