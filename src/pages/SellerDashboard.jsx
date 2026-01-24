@@ -20,7 +20,7 @@ const SellerDashboard = () => {
     resetData,
   } = useProducts();
 
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("products");
   const [editItem, setEditItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -142,22 +142,21 @@ const SellerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
-      <nav className="fixed bottom-0 left-0 right-0 z-50 h-20 bg-white/80 backdrop-blur-md border-t border-slate-200 flex flex-row items-center justify-around md:relative md:h-screen md:w-20 md:flex-col md:border-t-0 md:border-r md:justify-start md:pt-12 md:gap-5">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white/80 backdrop-blur-md border-t border-slate-200 flex flex-row items-center justify-around md:relative md:h-screen md:w-20 md:flex-col md:border-t-0 md:border-r md:justify-start md:pt-12 md:gap-5">
         <div className="hidden md:flex mb-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600">
           <Settings2 size={20} strokeWidth={2.5} />
         </div>
-
-        <NavButton
-          active={activeTab === "dashboard"}
-          onClick={setTabDashboard}
-          icon={<LayoutDashboard />}
-          label="Stats"
-        />
         <NavButton
           active={activeTab === "products"}
           onClick={setTabProducts}
           icon={<Package />}
           label="Items"
+        />
+        <NavButton
+          active={activeTab === "dashboard"}
+          onClick={setTabDashboard}
+          icon={<LayoutDashboard />}
+          label="Stats"
         />
         <NavButton
           active={activeTab === "add"}
