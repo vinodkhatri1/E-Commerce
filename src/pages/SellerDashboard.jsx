@@ -6,15 +6,13 @@ import {
   Search,
   Settings2,
 } from "lucide-react";
-import { useProducts } from "../context/productContext"; // Import your context hook
+import { useProducts } from "../context/productContext";
 
-// Local Component Imports
 import DashboardViewGraph from "../component/DashboardViewGraph";
 import Products1 from "../component/Products1";
 import AddProduct from "../component/AddProduct";
 
 const SellerDashboard = () => {
-  // 1. Consume Context
   const {
     products,
     addProduct,
@@ -24,39 +22,48 @@ const SellerDashboard = () => {
     resetData,
   } = useProducts();
 
-  // 2. UI State
   const [activeTab, setActiveTab] = useState("dashboard");
   const [editItem, setEditItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 3. Form-specific State
   const [previewImage, setPreviewImage] = useState(null);
   const [pricing, setPricing] = useState({
     price: "",
     originalPrice: "",
     discountPercent: 0,
   });
+
+  // --- ANALYTICS LOGIC ---
   const analytics = useMemo(() => {
+    if (!products || products.length === 0) {
+      return { totalVal: 0, lowStockCount: 0, avgPrice: 0 };
+    }
     const totalVal = products.reduce(
-      (sum, p) => sum + Number(p.price) * Number(p.stock),
+      (sum, p) => sum + (Number(p?.price) || 0) * (Number(p?.stock) || 0),
       0,
     );
-    const lowStockCount = products.filter((p) => p.stock < 10).length;
-    const avgPrice = products.length
-      ? products.reduce((sum, p) => sum + Number(p.price), 0) / products.length
-      : 0;
+    const lowStockCount = products.filter(
+      (p) => (Number(p?.stock) || 0) < 10,
+    ).length;
+    const avgPrice =
+      products.reduce((sum, p) => sum + (Number(p?.price) || 0), 0) /
+      products.length;
+
     return { totalVal, lowStockCount, avgPrice };
   }, [products]);
-  // 4. Derived State: Filtered Products for Search
+
+  // --- CRASH FIX: FILTERED PRODUCTS ---
+  // Added optional chaining (?.) and fallback empty strings to prevent .toLowerCase() on undefined
   const filteredProducts = useMemo(() => {
-    return products.filter(
-      (p) =>
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.brand?.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    const query = searchQuery.toLowerCase();
+    return products.filter((p) => {
+      const title = p?.title?.toLowerCase() || "";
+      const brand = p?.brand?.toLowerCase() || "";
+      return title.includes(query) || brand.includes(query);
+    });
   }, [products, searchQuery]);
 
-  // Logic: Handle Price & Discount (Syncing to Local State for live UI feedback)
+  // --- LOGIC HANDLERS ---
   const handlePriceChange = (e) => {
     const { name, value } = e.target;
     const newPricing = { ...pricing, [name]: value };
@@ -72,7 +79,6 @@ const SellerDashboard = () => {
     setPricing(newPricing);
   };
 
-  // Logic: Image Preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -82,7 +88,6 @@ const SellerDashboard = () => {
     }
   };
 
-  // Logic: Final Submission using Context functions
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -104,7 +109,6 @@ const SellerDashboard = () => {
       addProduct(productData);
     }
 
-    // Clean up
     setEditItem(null);
     setPreviewImage(null);
     setPricing({ price: "", originalPrice: "", discountPercent: 0 });
@@ -113,11 +117,12 @@ const SellerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
-      {/* RESPONSIVE NAVIGATION */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 h-20 bg-white/80 backdrop-blur-md border-t border-slate-200 flex flex-row items-center justify-around md:relative md:h-screen md:w-20 md:flex-col md:border-t-0 md:border-r md:justify-start md:pt-12 md:gap-5">
         <div className="hidden md:flex mb-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600">
           <Settings2 size={20} strokeWidth={2.5} />
         </div>
+
+        {/* NAV BUTTONS WITH UNIQUE KEYS (Internal fix if mapped, but here they are static) */}
         <NavButton
           active={activeTab === "dashboard"}
           onClick={() => setActiveTab("dashboard")}
@@ -150,9 +155,7 @@ const SellerDashboard = () => {
         </button>
       </nav>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 sm:p-8 lg:p-12 pb-28 md:pb-12 overflow-y-auto w-full max-w-400 mx-auto">
-        {/* TOP SEARCH BAR - Only shows on Inventory/Dashboard */}
+      <main className="flex-1 p-4 sm:p-8 lg:p-12 pb-28 md:pb-12 overflow-y-auto w-full max-w-6xl mx-auto">
         {activeTab !== "add" && (
           <div className="mb-8 relative max-w-md animate-in fade-in slide-in-from-top-2 duration-700">
             <Search
@@ -218,11 +221,7 @@ const NavButton = ({ active, icon, onClick, label }) => (
   <button
     onClick={onClick}
     className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all duration-300 group
-      ${
-        active
-          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-110"
-          : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50"
-      }`}
+      ${active ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-110" : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50"}`}
   >
     {React.cloneElement(icon, { size: 26, strokeWidth: active ? 2.5 : 2 })}
     <span
