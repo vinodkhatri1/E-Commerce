@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import {
-  X,
-  Mail,
-  Lock,
-  ArrowRight,
-  Eye,
-  EyeOff,
-  User as UserIcon,
-} from "lucide-react";
+import X from "lucide-react/dist/esm/icons/x";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Lock from "lucide-react/dist/esm/icons/lock";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import UserIcon from "lucide-react/dist/esm/icons/user";
 import { useAuth } from "../context/AuthContext";
 
 const LogIn = ({ onClose }) => {

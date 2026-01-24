@@ -1,5 +1,6 @@
 import Stars from "./Stars";
-import { Heart, ShoppingCart } from "lucide-react";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldCheck } from "lucide-react";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 
 const OrderSummary = ({ cart, subtotal, shipping, total }) => (
   <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 sticky top-28">

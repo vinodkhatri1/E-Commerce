@@ -1,4 +1,5 @@
-import { Star, StarHalf } from "lucide-react";
+import Star from "lucide-react/dist/esm/icons/star";
+import StarHalf from "lucide-react/dist/esm/icons/star-half";
 
 const Stars = ({ rating, size = 16 }) => {
   return (

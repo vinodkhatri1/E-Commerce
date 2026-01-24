@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldCheck } from "lucide-react";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 
 const SuccessOverlay = () => (
   <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/90 backdrop-blur-md animate-in fade-in duration-500">

@@ -1,11 +1,9 @@
-import React, { useState, useMemo } from "react";
-import {
-  LayoutDashboard,
-  Package,
-  PlusCircle,
-  Search,
-  Settings2,
-} from "lucide-react";
+import React, { useState, useMemo, useCallback, useDeferredValue } from "react";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import Package from "lucide-react/dist/esm/icons/package";
+import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
+import Search from "lucide-react/dist/esm/icons/search";
+import Settings2 from "lucide-react/dist/esm/icons/settings-2";
 import { useProducts } from "../context/productContext";
 
 import DashboardViewGraph from "../component/DashboardViewGraph";
@@ -25,7 +23,7 @@ const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [editItem, setEditItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [previewImage, setPreviewImage] = useState(null);
   const [pricing, setPricing] = useState({
     price: "",
@@ -33,7 +31,6 @@ const SellerDashboard = () => {
     discountPercent: 0,
   });
 
-  // --- ANALYTICS LOGIC ---
   const analytics = useMemo(() => {
     if (!products || products.length === 0) {
       return { totalVal: 0, lowStockCount: 0, avgPrice: 0 };
@@ -52,68 +49,96 @@ const SellerDashboard = () => {
     return { totalVal, lowStockCount, avgPrice };
   }, [products]);
 
-  // --- CRASH FIX: FILTERED PRODUCTS ---
-  // Added optional chaining (?.) and fallback empty strings to prevent .toLowerCase() on undefined
   const filteredProducts = useMemo(() => {
-    const query = searchQuery.toLowerCase();
+    const query = deferredSearchQuery.toLowerCase();
     return products.filter((p) => {
       const title = p?.title?.toLowerCase() || "";
       const brand = p?.brand?.toLowerCase() || "";
       return title.includes(query) || brand.includes(query);
     });
-  }, [products, searchQuery]);
+  }, [products, deferredSearchQuery]);
 
-  // --- LOGIC HANDLERS ---
-  const handlePriceChange = (e) => {
+  const handlePriceChange = useCallback((e) => {
     const { name, value } = e.target;
-    const newPricing = { ...pricing, [name]: value };
-    if (newPricing.price && newPricing.originalPrice) {
-      const disc =
-        ((newPricing.originalPrice - newPricing.price) /
-          newPricing.originalPrice) *
-        100;
-      newPricing.discountPercent = disc > 0 ? Math.round(disc) : 0;
-    } else {
-      newPricing.discountPercent = 0;
-    }
-    setPricing(newPricing);
-  };
 
-  const handleImageChange = (e) => {
+    setPricing((prev) => {
+      const newPricing = { ...prev, [name]: value };
+      if (newPricing.price && newPricing.originalPrice) {
+        const disc =
+          ((newPricing.originalPrice - newPricing.price) /
+            newPricing.originalPrice) *
+          100;
+        newPricing.discountPercent = disc > 0 ? Math.round(disc) : 0;
+      } else {
+        newPricing.discountPercent = 0;
+      }
+      return newPricing;
+    });
+  }, []);
+
+  const handleImageChange = useCallback((e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => setPreviewImage(reader.result);
       reader.readAsDataURL(file);
     }
-  };
+  }, []);
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const productData = {
-      title: formData.get("title"),
-      brand: formData.get("brand"),
-      category: formData.get("category"),
-      description: formData.get("description"),
-      stock: formData.get("stock"),
-      price: pricing.price,
-      originalPrice: pricing.originalPrice,
-      discountPercent: pricing.discountPercent,
-      image: previewImage,
-    };
+  const handleFormSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
 
-    if (editItem) {
-      updateProduct(editItem.id, productData);
-    } else {
-      addProduct(productData);
-    }
+      const productData = {
+        title: formData.get("title"),
+        brand: formData.get("brand"),
+        category: formData.get("category"),
+        description: formData.get("description"),
+        stock: formData.get("stock"),
+        price: pricing.price,
+        originalPrice: pricing.originalPrice,
+        discountPercent: pricing.discountPercent,
+        image: previewImage,
+      };
 
+      if (editItem) {
+        updateProduct(editItem.id, productData);
+      } else {
+        addProduct(productData);
+      }
+
+      setEditItem(null);
+      setPreviewImage(null);
+      setPricing({ price: "", originalPrice: "", discountPercent: 0 });
+      setActiveTab("products");
+    },
+    [editItem, pricing, previewImage, addProduct, updateProduct],
+  );
+
+  // Handler for "New" button click
+  const handleNewClick = useCallback(() => {
     setEditItem(null);
     setPreviewImage(null);
     setPricing({ price: "", originalPrice: "", discountPercent: 0 });
-    setActiveTab("products");
-  };
+    setActiveTab("add");
+  }, []);
+
+  // Handler for "Edit" click (passed to child)
+  const handleEditClick = useCallback((item) => {
+    setEditItem(item);
+    setPricing({
+      price: item.price,
+      originalPrice: item.originalPrice || item.price,
+      discountPercent: item.discountPercent,
+    });
+    setPreviewImage(item.image);
+    setActiveTab("add");
+  }, []);
+
+  // Separate handlers for tab switching to ensure stable props for NavButtons
+  const setTabDashboard = useCallback(() => setActiveTab("dashboard"), []);
+  const setTabProducts = useCallback(() => setActiveTab("products"), []);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
@@ -122,27 +147,21 @@ const SellerDashboard = () => {
           <Settings2 size={20} strokeWidth={2.5} />
         </div>
 
-        {/* NAV BUTTONS WITH UNIQUE KEYS (Internal fix if mapped, but here they are static) */}
         <NavButton
           active={activeTab === "dashboard"}
-          onClick={() => setActiveTab("dashboard")}
+          onClick={setTabDashboard}
           icon={<LayoutDashboard />}
           label="Stats"
         />
         <NavButton
           active={activeTab === "products"}
-          onClick={() => setActiveTab("products")}
+          onClick={setTabProducts}
           icon={<Package />}
           label="Items"
         />
         <NavButton
           active={activeTab === "add"}
-          onClick={() => {
-            setEditItem(null);
-            setPreviewImage(null);
-            setPricing({ price: "", originalPrice: "", discountPercent: 0 });
-            setActiveTab("add");
-          }}
+          onClick={handleNewClick}
           icon={<PlusCircle />}
           label="New"
         />
@@ -186,16 +205,7 @@ const SellerDashboard = () => {
               products={filteredProducts}
               setActiveTab={setActiveTab}
               deleteProduct={deleteProduct}
-              setEditItem={(item) => {
-                setEditItem(item);
-                setPricing({
-                  price: item.price,
-                  originalPrice: item.originalPrice || item.price,
-                  discountPercent: item.discountPercent,
-                });
-                setPreviewImage(item.image);
-                setActiveTab("add");
-              }}
+              setEditItem={handleEditClick}
             />
           )}
 
@@ -217,19 +227,26 @@ const SellerDashboard = () => {
   );
 };
 
-const NavButton = ({ active, icon, onClick, label }) => (
+// PERFORMANCE: Memoized to prevent re-renders when parent state (like Search) changes
+const NavButton = React.memo(({ active, icon, onClick, label }) => (
   <button
     onClick={onClick}
     className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all duration-300 group
-      ${active ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-110" : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50"}`}
+      ${
+        active
+          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-110"
+          : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50"
+      }`}
   >
     {React.cloneElement(icon, { size: 26, strokeWidth: active ? 2.5 : 2 })}
     <span
-      className={`text-[9px] font-black uppercase mt-1.5 md:hidden ${active ? "opacity-100" : "opacity-60"}`}
+      className={`text-[9px] font-black uppercase mt-1.5 md:hidden ${
+        active ? "opacity-100" : "opacity-60"
+      }`}
     >
       {label}
     </span>
   </button>
-);
+));
 
 export default SellerDashboard;

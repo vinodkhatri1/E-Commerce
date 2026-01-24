@@ -1,12 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  Heart,
-  Trash2,
-  ShoppingBag,
-  ArrowRight,
-  ChevronLeft,
-} from "lucide-react";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
 import { useCart } from "../context/CartContext";
 
 const Wishlist = () => {

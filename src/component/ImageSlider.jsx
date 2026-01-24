@@ -1,15 +1,21 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { Link } from "react-router-dom";
 import ProductData from "../Data/ProductData";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ShoppingBag,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
-const slides = [
+// PERFORMANCE: Constants moved outside to avoid re-allocation
+const AUTO_TIME = 7000;
+const SLIDES_DATA = [
   {
     id: 1,
     category: "Computing",
@@ -53,57 +59,58 @@ const slides = [
   },
 ];
 
-const AUTO_TIME = 7000;
-const dynamicCategories = [
-  ...new Set(ProductData?.map((p) => p.category) || []),
-];
-
 const ImageSlider = () => {
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const timerRef = useRef(null);
+
+  const requestRef = useRef();
+  const lastTimeRef = useRef();
+
+  const dynamicCategories = useMemo(() => {
+    return [...new Set(ProductData?.map((p) => p.category) || [])].slice(0, 11);
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    setCurrent((prev) => (prev === SLIDES_DATA.length - 1 ? 0 : prev + 1));
+    setProgress(0);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrent((prev) => (prev === 0 ? SLIDES_DATA.length - 1 : prev - 1));
+    setProgress(0);
+  }, []);
 
   const goToSlide = useCallback((index) => {
     setCurrent(index);
     setProgress(0);
   }, []);
 
-  const nextSlide = useCallback(() => {
-    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    setProgress(0);
-  }, []);
-
-  const prevSlide = () => {
-    setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-    setProgress(0);
-  };
   useEffect(() => {
-    if (isHovered) return;
+    const animate = (time) => {
+      if (lastTimeRef.current !== undefined && !isHovered) {
+        const deltaTime = time - lastTimeRef.current;
+        setProgress((prev) => {
+          const nextProgress = prev + (deltaTime / AUTO_TIME) * 100;
+          if (nextProgress >= 100) {
+            nextSlide();
+            return 0;
+          }
+          return nextProgress;
+        });
+      }
+      lastTimeRef.current = time;
+      requestRef.current = requestAnimationFrame(animate);
+    };
 
-    const timer = setTimeout(
-      () => {
-        nextSlide();
-      },
-      AUTO_TIME * (1 - progress / 100),
-    );
+    requestRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(requestRef.current);
+  }, [isHovered, nextSlide]);
 
-    return () => clearTimeout(timer);
-  }, [current, isHovered, progress, nextSlide]);
-  useEffect(() => {
-    if (isHovered) return;
-
-    const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 0 : prev + 0.5));
-    }, AUTO_TIME / 200);
-
-    return () => clearInterval(interval);
-  }, [isHovered, current]);
-
-  const slide = slides[current];
+  const slide = SLIDES_DATA[current];
 
   return (
-    <div className="px-5">
+    <div className="px-6">
       <div className="flex flex-col md:flex-row w-full bg-white overflow-hidden rounded-3xl shadow-2xl border border-slate-100">
         {/* --- SIDEBAR CATEGORIES --- */}
         <div className="w-full md:w-72 bg-slate-50/50 p-4 border-r border-slate-100 hidden lg:block">
@@ -113,7 +120,7 @@ const ImageSlider = () => {
             </h3>
           </div>
           <div className="space-y-1">
-            {dynamicCategories.slice(0, 11).map((cat) => (
+            {dynamicCategories.map((cat) => (
               <Link
                 key={cat}
                 to={`/category/${cat}`}
@@ -137,18 +144,14 @@ const ImageSlider = () => {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Progress Bar */}
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-900/5 backdrop-blur-sm z-50 overflow-hidden">
+          {/* Progress Bar - CSS optimized with transform for smoother rendering */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-900/5 backdrop-blur-sm z-40">
             <div
-              className={`h-full ${slide.accent} shadow-[0_0_10px_rgba(0,0,0,0.1)] transition-all ease-linear`}
-              style={{
-                width: `${progress}%`,
-                transitionDuration: isHovered ? "0ms" : "100ms", // Smooth gliding
-              }}
+              className={`h-full ${slide.accent} transition-transform duration-75 ease-linear origin-left`}
+              style={{ transform: `scaleX(${progress / 100})` }}
             />
           </div>
 
-          {/* Content Container */}
           <div className="container mx-auto px-8 md:px-16 flex flex-col-reverse md:flex-row items-center justify-between min-h-125 lg:min-h-150 py-12 relative z-10">
             {/* Text Content */}
             <div className="flex flex-col gap-6 text-center md:text-left items-center md:items-start max-w-xl">
@@ -161,10 +164,7 @@ const ImageSlider = () => {
                 </div>
               </div>
 
-              <h1
-                key={`title-${current}`}
-                className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight animate-in fade-in slide-in-from-bottom-6 duration-700"
-              >
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight">
                 {slide.title.split(" ").map((word, i) => (
                   <span key={i} className={i === 1 ? slide.textAccent : ""}>
                     {word}{" "}
@@ -172,17 +172,14 @@ const ImageSlider = () => {
                 ))}
               </h1>
 
-              <p
-                key={`sub-${current}`}
-                className="text-base md:text-lg text-slate-600 font-medium max-w-md animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100"
-              >
+              <p className="text-base md:text-lg text-slate-600 font-medium max-w-md">
                 {slide.subtitle}
               </p>
 
-              <div className="pt-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-200">
+              <div className="pt-4">
                 <Link to={slide.link}>
                   <button
-                    className={`${slide.accent} ${slide.shadow} text-white rounded-2xl px-8 py-4 font-black text-xs uppercase tracking-[0.15em] shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group`}
+                    className={`${slide.accent} ${slide.shadow} text-white rounded-2xl px-8 py-4 font-black text-xs uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group`}
                   >
                     <ShoppingBag size={18} /> Explore Now
                     <ArrowRight
@@ -196,76 +193,49 @@ const ImageSlider = () => {
 
             {/* Image Content */}
             <div className="relative w-full max-w-70 md:max-w-md lg:max-w-lg flex justify-center items-center">
-              {/* Background Glow */}
               <div
                 className={`absolute inset-0 scale-125 opacity-20 blur-[100px] rounded-full transition-all duration-1000 ${slide.accent}`}
               />
-
-              <div
-                key={`img-${current}`}
-                className="relative z-10 animate-in zoom-in-90 fade-in duration-1000"
-              >
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-auto max-h-112.5 object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)]"
-                />
-                {/* Product Shadow */}
-                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-4/5 h-6 bg-slate-900/10 blur-3xl rounded-[100%]" />
-              </div>
+              <img
+                key={current}
+                src={slide.image}
+                alt={slide.title}
+                className="relative z-10 w-full h-auto max-h-112.5 object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-700"
+              />
             </div>
           </div>
 
-          {/* --- NAVIGATION CONTROLS --- */}
+          {/* Navigation Controls */}
           <div className="absolute inset-y-0 inset-x-0 flex items-center justify-between px-6 pointer-events-none z-30">
-            <button
+            <NavBtn
               onClick={prevSlide}
-              className="p-3 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 text-slate-800 hover:bg-white hover:scale-110 transition-all shadow-2xl pointer-events-auto active:scale-90 group"
-            >
-              <ChevronLeft
-                size={20}
-                className="group-hover:-translate-x-0.5 transition-transform"
-              />
-            </button>
-            <button
+              icon={<ChevronLeft size={20} />}
+              side="left"
+            />
+            <NavBtn
               onClick={nextSlide}
-              className="p-3 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 text-slate-800 hover:bg-white hover:scale-110 transition-all shadow-2xl pointer-events-auto active:scale-90 group"
-            >
-              <ChevronRight
-                size={20}
-                className="group-hover:translate-x-0.5 transition-transform"
-              />
-            </button>
+              icon={<ChevronRight size={20} />}
+              side="right"
+            />
           </div>
 
-          {/* Bottom Pagination */}
+          {/* Pagination Indicators */}
           <div className="absolute bottom-8 left-0 w-full px-12 flex justify-between items-end z-40">
             <div className="flex gap-3">
-              {slides.map((_, index) => (
+              {SLIDES_DATA.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`group relative h-1.5 rounded-full transition-all duration-500 bg-slate-300/50 overflow-hidden ${
-                    current === index
-                      ? "w-16"
-                      : "w-6 hover:w-10 hover:bg-slate-400"
-                  }`}
+                  className={`relative h-1.5 rounded-full transition-all duration-500 bg-slate-300/50 ${current === index ? "w-16" : "w-6"}`}
                 >
                   {current === index && (
                     <div
-                      className={`h-full ${slide.accent}`}
+                      className={`h-full ${slide.accent} rounded-full`}
                       style={{ width: `${progress}%` }}
                     />
                   )}
                 </button>
               ))}
-            </div>
-
-            <div className="hidden sm:block">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <span className="text-slate-900 text-sm">0{current + 1}</span> /
-                0{slides.length}
-              </p>
             </div>
           </div>
         </div>
@@ -273,5 +243,19 @@ const ImageSlider = () => {
     </div>
   );
 };
+
+// Internal Helper Component for Nav Buttons
+const NavBtn = React.memo(({ onClick, icon, side }) => (
+  <button
+    onClick={onClick}
+    className="p-3 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 text-slate-800 hover:bg-white hover:scale-110 transition-all shadow-2xl pointer-events-auto active:scale-90 group"
+  >
+    <span
+      className={`inline-block transition-transform ${side === "left" ? "group-hover:-translate-x-0.5" : "group-hover:translate-x-0.5"}`}
+    >
+      {icon}
+    </span>
+  </button>
+));
 
 export default ImageSlider;

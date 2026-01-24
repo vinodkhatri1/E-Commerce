@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ChevronDown, Hash } from "lucide-react";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Hash from "lucide-react/dist/esm/icons/hash";
 
 const DetailedOrderCard = ({ order }) => {
   const [isOpen, setIsOpen] = useState(false);
