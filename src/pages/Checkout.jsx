@@ -106,7 +106,7 @@ const Checkout = () => {
     setShowSuccess(true);
     clearCart();
     closeCart();
-    setTimeout(() => navigate("/UserProfile"), 3500);
+    setTimeout(() => navigate("/orders"), 3500);
   };
 
   if (cart.length === 0 && !showSuccess) return navigate("/UserProfile");
@@ -121,10 +121,10 @@ const Checkout = () => {
           <form onSubmit={handlePlaceOrder} className="lg:col-span-7 space-y-6">
             <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200">
               <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight italic mb-8 flex items-center gap-3">
-                <MapPin className="text-blue-600" /> Delivery
+                <MapPin className="text-blue-600" /> Shipping Address
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <InputField
+                {/* <InputField
                   label="Email"
                   name="email"
                   value={formData.email}
@@ -145,7 +145,7 @@ const Checkout = () => {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   error={validationErrors.lastName}
-                />
+                /> */}
                 <InputField
                   label="Address"
                   name="address"

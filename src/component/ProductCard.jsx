@@ -67,14 +67,6 @@ const ProductCard = ({ productdt }) => {
             )}
           </div>
           <div className="flex gap-2">
-            <button
-              className="bg-gray-100 text-gray-800 p-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
-              onClick={() => addToCart(productdt)}
-              title="Add to Cart"
-            >
-              <ShoppingCart size={20} />
-            </button>
-
             {/* Wishlist Button Updated */}
             <button
               className={`p-2 rounded-lg transition-colors ${
@@ -91,6 +83,13 @@ const ProductCard = ({ productdt }) => {
                 size={20}
                 fill={activeWishlist ? "currentColor" : "none"}
               />
+            </button>
+            <button
+              className="bg-gray-100 text-gray-800 p-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
+              onClick={() => addToCart(productdt)}
+              title="Add to Cart"
+            >
+              <ShoppingCart size={20} />
             </button>
           </div>
         </div>

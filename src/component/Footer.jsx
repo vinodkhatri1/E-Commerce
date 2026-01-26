@@ -5,8 +5,6 @@ import Instagram from "lucide-react/dist/esm/icons/instagram";
 import Twitter from "lucide-react/dist/esm/icons/twitter";
 import Github from "lucide-react/dist/esm/icons/github";
 import Mail from "lucide-react/dist/esm/icons/mail";
-
-// Replace this path with your actual logo file path (e.g., /assets/logo.png)
 import myLogo from "../assets/logo.png";
 
 const Footer = () => {
@@ -24,12 +22,8 @@ const Footer = () => {
               src={myLogo}
               alt="Store Logo"
               className="h-16 w-auto object-contain"
-              onError={(e) => (e.target.style.display = "none")} // Hides if image fails
+              onError={(e) => (e.target.style.display = "none")}
             />
-            {/* Fallback Text Logo if image is missing */}
-            <span className="text-2xl font-black tracking-tighter text-slate-900">
-              STORE<span className="text-blue-600">.</span>
-            </span>
           </Link>
 
           <p className="text-slate-500 text-sm leading-relaxed max-w-xs font-medium">
