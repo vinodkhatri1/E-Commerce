@@ -5,7 +5,6 @@ import Instagram from "lucide-react/dist/esm/icons/instagram";
 import Twitter from "lucide-react/dist/esm/icons/twitter";
 import Github from "lucide-react/dist/esm/icons/github";
 import Mail from "lucide-react/dist/esm/icons/mail";
-
 import myLogo from "../assets/logo.png";
 
 const Footer = () => {
@@ -22,9 +21,6 @@ const Footer = () => {
               className="h-16 w-auto object-contain"
               onError={(e) => (e.target.style.display = "none")}
             />
-            <span className="text-2xl font-black tracking-tighter text-slate-900">
-              STORE<span className="text-blue-600">.</span>
-            </span>
           </Link>
 
           <p className="text-slate-500 text-sm leading-relaxed max-w-xs font-medium">
