@@ -22,13 +22,11 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import Phone from "lucide-react/dist/esm/icons/phone";
 import Home from "lucide-react/dist/esm/icons/home";
 
-// --- CONTEXT & DATA ---
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import ProductData from "../Data/ProductData";
 import logo from "../assets/logo.png";
 
-// --- MODALS ---
 import Cart from "./Cart";
 import LogIn from "./LogIn";
 
@@ -39,9 +37,8 @@ const Header = () => {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Search State
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedTerm, setDebouncedTerm] = useState(""); // New state for performance
+  const [debouncedTerm, setDebouncedTerm] = useState("");
   const [selectedCat, setSelectedCat] = useState("All");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -50,13 +47,10 @@ const Header = () => {
   const searchContainerRef = useRef(null);
   const userMenuRef = useRef(null);
 
-  // --- PERFORMANCE: Memoize Categories ---
-  // Only recalculate if ProductData actually changes
   const dynamicCategories = useMemo(() => {
     return [...new Set(ProductData?.map((p) => p.category) || [])];
   }, []);
 
-  // --- PERFORMANCE: Click Outside Logic ---
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -69,15 +63,12 @@ const Header = () => {
         setIsUserDropdownOpen(false);
       }
     };
-    // Passive listener for better scrolling performance
     document.addEventListener("mousedown", handleClickOutside, {
       passive: true,
     });
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- PERFORMANCE: Debounce Search Input ---
-  // Wait 300ms after user stops typing to update the term used for filtering
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedTerm(searchTerm);
@@ -86,8 +77,6 @@ const Header = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // --- PERFORMANCE: Memoized Filter Logic ---
-  // Runs only when debouncedTerm or selectedCat changes, not on every keystroke
   const suggestions = useMemo(() => {
     if (debouncedTerm.trim().length === 0) return [];
 
@@ -101,7 +90,6 @@ const Header = () => {
     }).slice(0, 5);
   }, [debouncedTerm, selectedCat]);
 
-  // --- PERFORMANCE: Memoized Submit Handler ---
   const handleSearchSubmit = useCallback(
     (e, termOverride) => {
       if (e) e.preventDefault();
@@ -163,9 +151,7 @@ const Header = () => {
       </div>
 
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-        {/* --- 1. Main Navigation Row --- */}
         <div className="max-w-7xl mx-auto px-4 py-3 md:py-0 md:h-20 flex items-center justify-between gap-x-4">
-          {/* Logo */}
           <Link to="/" className="shrink-0 order-1">
             <img
               className="h-15 md:h-18 w-auto"
@@ -175,7 +161,6 @@ const Header = () => {
             />
           </Link>
 
-          {/* Search Bar */}
           <div
             className="hidden md:block flex-1 max-w-2xl relative order-2"
             ref={searchContainerRef}
@@ -218,7 +203,6 @@ const Header = () => {
               </button>
             </form>
 
-            {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden z-50">
                 {suggestions.map((p) => (
@@ -251,7 +235,6 @@ const Header = () => {
             )}
           </div>
 
-          {/* User Actions */}
           <div className="flex items-center gap-2 sm:gap-4 order-3">
             <div>
               <Link to="/" className="shrink-0 order-1">
@@ -278,7 +261,6 @@ const Header = () => {
               )}
             </div>
 
-            {/* Account Toggle */}
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() =>
@@ -303,7 +285,6 @@ const Header = () => {
                 </div>
               </button>
 
-              {/* Account Dropdown */}
               {user && isUserDropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 w-56 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
                   <div className="p-4 bg-gray-50 border-b border-gray-100">
@@ -361,7 +342,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* --- 2. Mobile Only Search --- */}
         <div className="md:hidden px-4 pb-3">
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
@@ -377,7 +357,6 @@ const Header = () => {
           </form>
         </div>
 
-        {/* --- 3. Category Bar --- */}
         <div className="bg-slate-900 text-white text-[11px] font-bold">
           <div className="max-w-7xl mx-auto px-4 flex items-center gap-6 py-2.5 overflow-x-auto no-scrollbar whitespace-nowrap uppercase tracking-wider">
             <button
@@ -419,7 +398,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* --- MOBILE SIDEBAR --- */}
       <div
         className={`fixed inset-0 bg-black/60 z-100 transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -427,7 +405,6 @@ const Header = () => {
       <div
         className={`fixed top-0 left-0 h-full w-72 bg-white z-101 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        {/* FIXED SIDEBAR HEADER */}
         <div className="bg-slate-800 text-white p-6 flex items-center gap-4">
           <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
             <User size={20} />
@@ -458,7 +435,6 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Sidebar Content */}
         <div className="flex flex-col h-[calc(100%-88px)] bg-white">
           <div className="flex-1 overflow-y-auto p-5">
             <h3 className="text-gray-400 hover:text-blue-600 text-[12px] font-black uppercase tracking-[0.2em] ml-3 mb-4 bg-white pb-2">
@@ -541,7 +517,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* --- Modals --- */}
       {isCartOpen && <Cart setIsOpenCart={closeCart} />}
       {isLoginOpen && <LogIn onClose={closeLogin} />}
     </>

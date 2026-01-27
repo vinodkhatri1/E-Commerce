@@ -17,8 +17,6 @@ import {
 } from "recharts";
 import StatCard from "../component/StateCards";
 
-// --- PERFORMANCE: Static Data Moved Outside ---
-// Keeping these outside prevents memory reallocation on every render
 const DUMMY_CHART_DATA = [
   { name: "Jan", value: 400 },
   { name: "Feb", value: 600 },
@@ -56,8 +54,6 @@ const ALL_COUNTRIES = [
 const PIE_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#f43f5e"];
 
 const DashboardViewGraph = ({ products, categories, analytics }) => {
-  // --- PERFORMANCE: Memoized Calculations ---
-  // Only recalculate pie data if products or categories change
   const pieData = useMemo(() => {
     return categories.map((cat) => ({
       name: cat,
@@ -65,14 +61,12 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
     }));
   }, [categories, products]);
 
-  // Only re-slice if products array changes
   const topInventoryData = useMemo(() => {
     return products.slice(0, 6);
   }, [products]);
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* 1. STAT CARDS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <StatCard
           label="Total Value"
@@ -94,7 +88,6 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
         />
       </div>
 
-      {/* 2. SALES CHART (Full Width) */}
       <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm">
         <div className="flex flex-row flex-wrap justify-between items-center mb-4 gap-2">
           <div>
@@ -150,9 +143,7 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
         </div>
       </div>
 
-      {/* 3. MIDDLE ROW (Pie + Bar) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* STOCK DISTRIBUTION */}
         <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <h3 className="font-black text-sm md:text-base mb-4 text-slate-800">
             Stock Distribution
@@ -180,7 +171,6 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
           </div>
         </div>
 
-        {/* INVENTORY HEALTH */}
         <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <h3 className="font-black text-sm md:text-base mb-4 text-slate-800">
             Top Inventory Items
@@ -217,9 +207,7 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
         </div>
       </div>
 
-      {/* 4. BOTTOM ROW (Earnings + Global) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* MONTHLY EARNINGS */}
         <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-black text-sm md:text-base text-slate-800">
@@ -250,7 +238,6 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
           </div>
         </div>
 
-        {/* GLOBAL REACH LIST */}
         <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="font-black text-sm md:text-base mb-4 text-slate-800">
             Global Sales
@@ -281,5 +268,4 @@ const DashboardViewGraph = ({ products, categories, analytics }) => {
   );
 };
 
-// --- PERFORMANCE: Prevent Unnecessary Re-renders ---
 export default React.memo(DashboardViewGraph);

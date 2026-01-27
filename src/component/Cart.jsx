@@ -13,7 +13,6 @@ const Cart = ({ setIsOpenCart }) => {
   const navigate = useNavigate();
   const emptyCart = cart.length === 0;
 
-  // Logic calculation
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
@@ -33,15 +32,12 @@ const Cart = ({ setIsOpenCart }) => {
 
   return (
     <>
-      {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/60 z-100 backdrop-blur-sm transition-opacity"
         onClick={() => setIsOpenCart(false)}
       />
 
-      {/* Main Cart Drawer */}
       <div className="fixed top-0 right-0 z-110 w-full sm:w-112.5 h-screen bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
-        {/* Header */}
         <div className="h-20 flex justify-between items-center px-8 border-b border-gray-100">
           <div>
             <h1 className="text-xl font-bold text-gray-900 tracking-tight">
@@ -59,7 +55,6 @@ const Cart = ({ setIsOpenCart }) => {
           </button>
         </div>
 
-        {/* Content Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50/50">
           {emptyCart ? (
             <div className="flex flex-col justify-center items-center h-full p-8 text-center">
@@ -94,7 +89,6 @@ const Cart = ({ setIsOpenCart }) => {
           )}
         </div>
 
-        {/* Footer Section */}
         {!emptyCart && (
           <div className="border-t border-gray-100 p-8 bg-white">
             <div className="space-y-3 mb-8">

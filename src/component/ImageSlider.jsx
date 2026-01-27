@@ -13,7 +13,6 @@ import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
-// PERFORMANCE: Constants moved outside to avoid re-allocation
 const AUTO_TIME = 7000;
 const SLIDES_DATA = [
   {
@@ -112,7 +111,6 @@ const ImageSlider = () => {
   return (
     <div className="px-6">
       <div className="flex flex-col md:flex-row w-full bg-white overflow-hidden rounded-3xl shadow-2xl border border-slate-100">
-        {/* --- SIDEBAR CATEGORIES --- */}
         <div className="w-full md:w-72 bg-slate-50/50 p-4 border-r border-slate-100 hidden lg:block">
           <div className="mb-4 px-4">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
@@ -138,13 +136,11 @@ const ImageSlider = () => {
           </div>
         </div>
 
-        {/* --- SLIDER MAIN AREA --- */}
         <div
           className={`relative flex-1 overflow-hidden transition-colors duration-1000 bg-linear-to-br ${slide.gradient}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Progress Bar - CSS optimized with transform for smoother rendering */}
           <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-900/5 backdrop-blur-sm z-40">
             <div
               className={`h-full ${slide.accent} transition-transform duration-75 ease-linear origin-left`}
@@ -153,7 +149,6 @@ const ImageSlider = () => {
           </div>
 
           <div className="container mx-auto px-8 md:px-16 flex flex-col-reverse md:flex-row items-center justify-between min-h-125 lg:min-h-150 py-12 relative z-10">
-            {/* Text Content */}
             <div className="flex flex-col gap-6 text-center md:text-left items-center md:items-start max-w-xl">
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-white/50">
@@ -191,7 +186,6 @@ const ImageSlider = () => {
               </div>
             </div>
 
-            {/* Image Content */}
             <div className="relative w-full max-w-70 md:max-w-md lg:max-w-lg flex justify-center items-center">
               <div
                 className={`absolute inset-0 scale-125 opacity-20 blur-[100px] rounded-full transition-all duration-1000 ${slide.accent}`}
@@ -205,7 +199,6 @@ const ImageSlider = () => {
             </div>
           </div>
 
-          {/* Navigation Controls */}
           <div className="absolute inset-y-0 inset-x-0 flex items-center justify-between px-6 pointer-events-none z-30">
             <NavBtn
               onClick={prevSlide}
@@ -219,7 +212,6 @@ const ImageSlider = () => {
             />
           </div>
 
-          {/* Pagination Indicators */}
           <div className="absolute bottom-8 left-0 w-full px-12 flex justify-between items-end z-40">
             <div className="flex gap-3">
               {SLIDES_DATA.map((_, index) => (
@@ -244,7 +236,6 @@ const ImageSlider = () => {
   );
 };
 
-// Internal Helper Component for Nav Buttons
 const NavBtn = React.memo(({ onClick, icon, side }) => (
   <button
     onClick={onClick}

@@ -15,14 +15,12 @@ const OrderHistory = () => {
     if (user?.email) {
       const savedOrders = localStorage.getItem(`orders_${user.email}`);
       if (savedOrders) {
-        // Sort by date (newest first)
         const parsed = JSON.parse(savedOrders).reverse();
         setOrders(parsed);
       }
     }
   }, [user]);
 
-  // Filter logic
   const filteredOrders = orders.filter((order) =>
     order.id.toLowerCase().includes(searchTerm.toLowerCase()),
   );
@@ -32,7 +30,6 @@ const OrderHistory = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <Link
@@ -46,7 +43,6 @@ const OrderHistory = () => {
             </h1>
           </div>
 
-          {/* Search Bar */}
           <div className="relative">
             <input
               type="text"
@@ -62,7 +58,6 @@ const OrderHistory = () => {
           </div>
         </div>
 
-        {/* Orders List */}
         <div className="space-y-4">
           {filteredOrders.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm">

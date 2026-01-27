@@ -66,7 +66,6 @@ const SellerDashboardAddProduct = ({
               value={pricing.originalPrice}
               onChange={handlePriceChange}
             />
-            {/* Improved Badge Logic */}
             {pricing.discountPercent > 0 && pricing.discountPercent < 100 && (
               <span className="absolute -top-3 right-0 bg-emerald-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse shadow-lg shadow-emerald-200 flex items-center gap-1">
                 <Tag size={10} /> {pricing.discountPercent}% OFF

@@ -19,7 +19,6 @@ export const ProductProvider = ({ children }) => {
   };
 
   const addProduct = (data) => {
-    // Ensure we have a fallback if user email isn't immediately available
     const currentUEmail = data.sellerId || user?.email;
 
     const newProduct = {
@@ -36,7 +35,6 @@ export const ProductProvider = ({ children }) => {
 
   const deleteProduct = (id) => {
     const product = products.find((p) => p.id === id);
-    // PERMISSION CHECK
     if (user?.role === "admin" || product?.sellerId === user?.email) {
       if (window.confirm("Delete this listing?")) {
         saveInventory(products.filter((p) => p.id !== id));

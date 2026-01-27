@@ -55,7 +55,6 @@ const Wishlist = () => {
             key={product.id}
             className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
           >
-            {/* Image Section */}
             <div className="relative aspect-square bg-gray-50 p-6 flex items-center justify-center">
               <img
                 src={
@@ -74,7 +73,6 @@ const Wishlist = () => {
               </button>
             </div>
 
-            {/* Info Section */}
             <div className="p-5">
               <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">
                 {product.category}

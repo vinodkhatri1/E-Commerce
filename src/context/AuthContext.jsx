@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }) => {
       };
     }
 
-    // 4. Save and Reload
     setUser(userWithRole);
     localStorage.setItem("activeUser", JSON.stringify(userWithRole));
     closeLogin();

@@ -28,7 +28,6 @@ const SearchResults = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
-      {/* Search Header */}
       <div className="mb-8 border-b border-gray-100 pb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
           Results for <span className="text-blue-600">"{query}"</span>
@@ -39,7 +38,6 @@ const SearchResults = () => {
       </div>
 
       {filteredProducts.length > 0 ? (
-        /* Grid Layout using your ProductCard */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((item) => (
             <div key={item.id} className="h-full">

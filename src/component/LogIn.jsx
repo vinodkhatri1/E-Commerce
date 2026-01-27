@@ -19,7 +19,6 @@ const LogIn = ({ onClose }) => {
   const [error, setError] = useState("");
   const [role, setRole] = useState("buyer");
 
-  // State name changed back to formData for consistency with your handlers
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -39,7 +38,6 @@ const LogIn = ({ onClose }) => {
     e.preventDefault();
     setError("");
 
-    // Admin check
     if (
       formData.email === "admin@shop.com" &&
       formData.password === "admin123"
@@ -62,7 +60,7 @@ const LogIn = ({ onClose }) => {
 
       users.push(newUser);
       localStorage.setItem("registeredUsers", JSON.stringify(users));
-      login(newUser); // This passes all data to AuthContext
+      login(newUser);
     } else {
       const foundUser = users.find(
         (u) => u.email === formData.email && u.password === formData.password,
@@ -73,7 +71,7 @@ const LogIn = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
       <div className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">

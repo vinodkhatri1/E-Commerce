@@ -61,7 +61,6 @@ const Product = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 border-b border-gray-200 pb-12">
-        {/* Left: Images */}
         <div className="w-full lg:w-1/2 flex flex-col items-center">
           <div className="w-full max-w-lg aspect-square bg-white border border-gray-100 rounded-2xl overflow-hidden mb-4 flex items-center justify-center p-6 shadow-sm">
             <img
@@ -73,7 +72,6 @@ const Product = () => {
           <ProductImege pic={pic} setImage={setImage} />
         </div>
 
-        {/* Right: Details */}
         <div className="w-full lg:w-1/2 flex flex-col">
           <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
             {product.title}
@@ -102,7 +100,6 @@ const Product = () => {
             )}
           </div>
 
-          {/* Specs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8 mb-8 text-slate-700">
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-400 text-sm uppercase w-20">
@@ -137,7 +134,6 @@ const Product = () => {
             </p>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-wrap gap-4 mt-auto">
             <button
               className="flex-1 min-w-40 h-14 bg-blue-600 text-white hover:bg-slate-900 rounded-2xl transition-all flex items-center justify-center gap-2 font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-100"
@@ -155,7 +151,6 @@ const Product = () => {
               Buy Now
             </button>
 
-            {/* Wishlist Button */}
             <button
               onClick={() => toggleWishlist(product)}
               title={
@@ -176,12 +171,10 @@ const Product = () => {
         </div>
       </div>
 
-      {/* Reviews */}
       <div className="mt-12">
         <ReviewComments />
       </div>
 
-      {/* Similar Products */}
       <div className="mt-20">
         <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-4">
           Similar Products
