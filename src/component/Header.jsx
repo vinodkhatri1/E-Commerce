@@ -543,11 +543,7 @@ const Header = () => {
 
       {/* --- Modals --- */}
       {isCartOpen && <Cart setIsOpenCart={closeCart} />}
-      {isLoginOpen && (
-        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-          <LogIn onClose={closeLogin} />
-        </div>
-      )}
+      {isLoginOpen && <LogIn onClose={closeLogin} />}
     </>
   );
 };
