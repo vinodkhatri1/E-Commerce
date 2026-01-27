@@ -330,15 +330,18 @@ const Header = () => {
                   >
                     <Package size={16} /> Orders
                   </Link>
-                  <Link
-                    to="/seller-dashboard"
-                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
-                    onClick={() => {
-                      setIsUserDropdownOpen(false);
-                    }}
-                  >
-                    <LayoutDashboard size={16} /> Dashboard
-                  </Link>
+                  {(user?.role === "seller" || user?.role === "admin") && (
+                    <Link
+                      to="/seller-dashboard"
+                      className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-indigo-50 text-indigo-600 transition-colors font-bold"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      <LayoutDashboard size={18} />
+                      {user.role === "admin"
+                        ? "Admin Panel"
+                        : "Seller Dashboard"}
+                    </Link>
+                  )}
                   <button
                     onClick={logout}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-bold border-t"
@@ -459,7 +462,9 @@ const Header = () => {
         <div className="flex flex-col h-[calc(100%-88px)] bg-white">
           <div className="flex-1 overflow-y-auto p-5">
             <h3 className="text-gray-400 hover:text-blue-600 text-[12px] font-black uppercase tracking-[0.2em] ml-3 mb-4 bg-white pb-2">
-              <Link to="/categories">Shop Categories</Link>
+              <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)}>
+                Shop Categories
+              </Link>
             </h3>
             <div className="space-y-1 pb-4">
               {dynamicCategories.map((cat) => (
@@ -476,30 +481,61 @@ const Header = () => {
           </div>
 
           <div className="p-5 pb-8 border-t border-gray-100 bg-white shrink-0 space-y-1 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-20">
-            <Link
-              to="/UserProfile"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-2 p-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg font-medium"
+            <button
+              onClick={() => !user && openLogin()}
+              className="flex items-center gap-2 p-1 md:p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <User size={18} /> Your Account
-            </Link>
-            <Link
-              to="/orders"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg font-medium"
-            >
-              <Package size={18} /> Returns & Orders
-            </Link>
+              <User size={22} />
+              <div className="block text-left">
+                <p className="text-[10px] text-gray-400 leading-none">
+                  Hello, {user ? user.name.split(" ")[0] : "Sign in"}
+                </p>
+                <p className="text-xs font-bold text-gray-800 flex items-center">
+                  Account{" "}
+                  <ChevronDown
+                    size={12}
+                    className={`ml-1 transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
+                  />
+                </p>
+              </div>
+            </button>
+
             {user && (
-              <button
-                onClick={() => {
-                  logout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-3 p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg font-bold mt-2"
-              >
-                <LogOut size={18} /> Sign Out
-              </button>
+              <>
+                <Link
+                  to="/UserProfile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 p-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg font-medium"
+                >
+                  <User size={18} /> Your Account
+                </Link>
+                <Link
+                  to="/orders"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg font-medium"
+                >
+                  <Package size={18} /> Returns & Orders
+                </Link>
+                {(user?.role === "seller" || user?.role === "admin") && (
+                  <Link
+                    to="/seller-dashboard"
+                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-indigo-50 text-indigo-600 transition-colors font-bold"
+                    onClick={() => setIsUserDropdownOpen(false)}
+                  >
+                    <LayoutDashboard size={18} />
+                    {user.role === "admin" ? "Admin Panel" : "Seller Dashboard"}
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg font-bold mt-2"
+                >
+                  <LogOut size={18} /> Sign Out
+                </button>
+              </>
             )}
           </div>
         </div>

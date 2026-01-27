@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+
+// Icons
 import Clock from "lucide-react/dist/esm/icons/clock";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
@@ -15,14 +17,15 @@ import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import Package from "lucide-react/dist/esm/icons/package";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 
 const UserProfile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
   const { cart, addToCart, decreaseQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
 
   const [orderCount, setOrderCount] = useState(0);
-
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -40,9 +43,7 @@ const UserProfile = () => {
     if (user?.email) {
       const savedAddress = localStorage.getItem(`address_${user.email}`);
       const savedOrders = localStorage.getItem(`orders_${user.email}`);
-
       if (savedOrders) setOrderCount(JSON.parse(savedOrders).length);
-
       if (savedAddress) {
         setAddressInfo(JSON.parse(savedAddress));
       } else {
@@ -51,16 +52,26 @@ const UserProfile = () => {
     }
   }, [user]);
 
+  // --- MULTI-ROLE LOGIC ---
+  const toggleSellerRole = () => {
+    const isCurrentlySeller = user?.role === "seller";
+    const newRole = isCurrentlySeller ? "buyer" : "seller";
+
+    // Update context and localStorage via AuthContext
+    login({ ...user, role: newRole });
+
+    if (newRole === "seller") {
+      navigate("/seller-dashboard");
+    }
+  };
+
   const handleDeleteAccount = () => {
     if (!user?.email) return;
-
     const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
     const updatedUsers = allUsers.filter((u) => u.email !== user.email);
     localStorage.setItem("users", JSON.stringify(updatedUsers));
-
     localStorage.removeItem(`orders_${user.email}`);
     localStorage.removeItem(`address_${user.email}`);
-
     logout();
     navigate("/");
     alert("Account permanently deleted.");
@@ -95,12 +106,10 @@ const UserProfile = () => {
 
   const handlePayment = () => {
     if (cart.length === 0) return;
-
     if (!addressInfo.address || !addressInfo.city || !addressInfo.zip) {
       alert("Please complete your Delivery Address details before proceeding.");
       return;
     }
-
     localStorage.setItem(`address_${user.email}`, JSON.stringify(addressInfo));
     navigate("/checkout");
   };
@@ -115,24 +124,62 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* ASIDE: PROFILE CONTROLS */}
         <aside className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 text-center">
-            <img
-              src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name || "User"}&backgroundColor=2563eb`}
-              className="w-20 h-20 rounded-2xl mx-auto mb-4"
-              alt="Avatar"
-            />
+          <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200 text-center">
+            <div className="relative inline-block mb-4">
+              <img
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name || "User"}&backgroundColor=2563eb`}
+                className="w-24 h-24 rounded-3xl mx-auto shadow-inner"
+                alt="Avatar"
+              />
+              {user.role === "admin" && (
+                <div className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full border-4 border-white">
+                  <ShieldCheck size={16} />
+                </div>
+              )}
+            </div>
+
             <h2 className="text-xl font-black text-slate-900 tracking-tight">
               {user.name}
             </h2>
-            <button
-              onClick={logout}
-              className="mt-4 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors flex items-center justify-center gap-2 mx-auto"
-            >
-              <LogOut size={12} /> Secure Logout
-            </button>
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-6">
+              {user.role || "Buyer"} Account
+            </p>
+
+            <div className="space-y-3">
+              {/* Conditional Dashboard Button */}
+              {(user.role === "seller" || user.role === "admin") && (
+                <Link
+                  to="/seller-dashboard"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-100 transition-all"
+                >
+                  <LayoutDashboard size={14} /> Merchant Dashboard
+                </Link>
+              )}
+
+              {/* Become Seller / Switch Role Button */}
+              {user.role !== "admin" && (
+                <button
+                  onClick={toggleSellerRole}
+                  className="w-full py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
+                >
+                  {user.role === "seller"
+                    ? "Switch to Buyer View"
+                    : "Become a Seller"}
+                </button>
+              )}
+
+              <button
+                onClick={logout}
+                className="mt-4 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors flex items-center justify-center gap-2 mx-auto"
+              >
+                <LogOut size={12} /> Secure Logout
+              </button>
+            </div>
           </div>
 
+          {/* ORDER HISTORY LINK */}
           <Link to="/orders" className="block group">
             <div className="bg-white rounded-4xl p-6 shadow-sm border border-slate-200 group-hover:border-blue-300 transition-all group-hover:shadow-md">
               <div className="flex justify-between items-center mb-2">
@@ -165,6 +212,7 @@ const UserProfile = () => {
             </div>
           </Link>
 
+          {/* DANGER ZONE */}
           <div className="bg-red-50/50 rounded-4xl p-6 border border-red-100">
             <h3 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2">
               <AlertTriangle size={14} /> Danger Zone
@@ -200,6 +248,7 @@ const UserProfile = () => {
           </div>
         </aside>
 
+        {/* MAIN: SHIPPING & CART */}
         <main className="lg:col-span-8 space-y-6">
           <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-200 relative">
             <div className="flex justify-between items-start mb-8">
@@ -303,6 +352,7 @@ const UserProfile = () => {
             </div>
           </div>
 
+          {/* BAG SUMMARY */}
           <div className="space-y-4 pt-4">
             <h2 className="text-xl font-black text-slate-900 px-2 tracking-tight uppercase flex items-center justify-between">
               Current Bag
@@ -317,7 +367,11 @@ const UserProfile = () => {
               >
                 <div className="w-16 h-16 bg-slate-50 rounded-xl p-2 shrink-0 flex items-center justify-center">
                   <img
-                    src={`/image/${item.category}/${item.image}`}
+                    src={
+                      item.image?.startsWith("data:")
+                        ? item.image
+                        : `/image/${item.category}/${item.image}`
+                    }
                     className="h-full object-contain"
                     alt={item.title}
                   />

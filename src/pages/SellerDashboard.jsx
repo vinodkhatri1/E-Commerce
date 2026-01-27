@@ -1,174 +1,177 @@
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useDeferredValue,
-  useEffect,
-} from "react";
+import React, { useState, useMemo, useDeferredValue, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProducts } from "../context/productContext";
+import { useAuth } from "../context/AuthContext";
 
 // Icons
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import Package from "lucide-react/dist/esm/icons/package";
 import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
 import Search from "lucide-react/dist/esm/icons/search";
-import Settings2 from "lucide-react/dist/esm/icons/settings-2";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Lock from "lucide-react/dist/esm/icons/lock";
-
-// Contexts
-import { useProducts } from "../context/productContext";
-import { useAuth } from "../context/AuthContext";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 
 // Components
-import DashboardViewGraph from "../component/DashboardViewGraph";
+import DashboardViewGraph from "../component/DashboardViewGraph"; // Assuming you have this or generic placeholder
 import SellerDashboardProduct from "../component/SellerDashboardProduct";
 import SellerDashboardAddProduct from "../component/SellerDashboardAddProduct";
 
 const SellerDashboard = () => {
-  // --- 1. ALL HOOKS MUST BE DECLARED AT THE VERY TOP ---
-  const { user, openLogin, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { products, addProduct, updateProduct, deleteProduct, categories } =
+    useProducts();
 
-  const {
-    products,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    categories,
-    resetData,
-  } = useProducts();
-
+  // --- STATE MANAGEMENT ---
   const [activeTab, setActiveTab] = useState("products");
   const [editItem, setEditItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [previewImage, setPreviewImage] = useState(null);
+
+  // Pricing state for the Add/Edit Form
   const [pricing, setPricing] = useState({
     price: "",
     originalPrice: "",
     discountPercent: 0,
   });
 
-  // 🛡️ REDIRECT EFFECT: If user logs out, send them home immediately
+  // --- 1. AUTH PROTECTION ---
   useEffect(() => {
-    if (!user) {
+    // If no user, or user is not seller/admin, redirect home
+    if (!user || (user.role !== "seller" && user.role !== "admin")) {
       navigate("/", { replace: true });
     }
   }, [user, navigate]);
 
-  // Logout Handler
-  const handleLogout = useCallback(() => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      logout();
-      navigate("/", { replace: true });
-    }
-  }, [logout, navigate]);
+  const myVisibleProducts = useMemo(() => {
+    if (!user || !user.email) return [];
 
-  // Analytics Calculation
-  const analytics = useMemo(() => {
-    if (!products || products.length === 0)
-      return { totalVal: 0, lowStockCount: 0, avgPrice: 0 };
-    const totalVal = products.reduce(
-      (sum, p) => sum + (Number(p?.price) || 0) * (Number(p?.stock) || 0),
-      0,
-    );
-    const lowStockCount = products.filter(
-      (p) => (Number(p?.stock) || 0) < 10,
-    ).length;
-    const avgPrice =
-      products.reduce((sum, p) => sum + (Number(p?.price) || 0), 0) /
-      products.length;
-    return { totalVal, lowStockCount, avgPrice };
-  }, [products]);
+    if (user.role === "admin") return products;
 
-  // Filtering Logic
+    return products.filter((p) => {
+      return p.sellerId === user.email;
+    });
+  }, [products, user]);
+
+  // --- 3. SEARCH FILTERING ---
   const filteredProducts = useMemo(() => {
     const query = deferredSearchQuery.toLowerCase();
-    return products.filter((p) => {
-      const title = p?.title?.toLowerCase() || "";
-      const brand = p?.brand?.toLowerCase() || "";
-      return title.includes(query) || brand.includes(query);
-    });
-  }, [products, deferredSearchQuery]);
+    return myVisibleProducts.filter(
+      (p) =>
+        p.title?.toLowerCase().includes(query) ||
+        p.brand?.toLowerCase().includes(query),
+    );
+  }, [myVisibleProducts, deferredSearchQuery]);
 
-  // Form Handlers
-  const handlePriceChange = useCallback((e) => {
+  // --- 4. ANALYTICS CALCULATION ---
+  const analytics = useMemo(() => {
+    const totalVal = myVisibleProducts.reduce(
+      (sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock) || 0),
+      0,
+    );
+    return {
+      totalVal,
+      lowStockCount: myVisibleProducts.filter(
+        (p) => (Number(p.stock) || 0) < 10,
+      ).length,
+      avgPrice: myVisibleProducts.length
+        ? totalVal / myVisibleProducts.length
+        : 0,
+    };
+  }, [myVisibleProducts]);
+
+  // --- 5. PRICE & DISCOUNT CALCULATION ---
+  const handlePriceChange = (e) => {
     const { name, value } = e.target;
-    setPricing((prev) => {
-      const newPricing = { ...prev, [name]: value };
-      if (newPricing.price && newPricing.originalPrice) {
-        const disc =
-          ((newPricing.originalPrice - newPricing.price) /
-            newPricing.originalPrice) *
-          100;
-        newPricing.discountPercent = disc > 0 ? Math.round(disc) : 0;
-      } else {
-        newPricing.discountPercent = 0;
-      }
-      return newPricing;
-    });
-  }, []);
 
-  const handleImageChange = useCallback((e) => {
+    setPricing((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      // Convert to numbers for math
+      const salePrice = parseFloat(updated.price) || 0;
+      const regPrice = parseFloat(updated.originalPrice) || 0;
+
+      // Auto-calculate discount percentage
+      if (regPrice > salePrice && salePrice > 0) {
+        const percentage = ((regPrice - salePrice) / regPrice) * 100;
+        updated.discountPercent = Math.round(percentage);
+      } else {
+        updated.discountPercent = 0;
+      }
+
+      return updated;
+    });
+  };
+
+  // --- 6. IMAGE HANDLER ---
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewImage(reader.result);
-      reader.readAsDataURL(file);
+      const r = new FileReader();
+      r.onloadend = () => setPreviewImage(r.result);
+      r.readAsDataURL(file);
     }
-  }, []);
+  };
 
-  const handleFormSubmit = useCallback(
-    (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const productData = {
-        title: formData.get("title"),
-        brand: formData.get("brand"),
-        category: formData.get("category"),
-        description: formData.get("description"),
-        stock: formData.get("stock"),
-        price: pricing.price,
-        originalPrice: pricing.originalPrice,
-        discountPercent: pricing.discountPercent,
-        image: previewImage,
-      };
-      if (editItem) updateProduct(editItem.id, productData);
-      else addProduct(productData);
+  // --- 7. FORM SUBMISSION ---
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
 
-      setEditItem(null);
-      setPreviewImage(null);
-      setPricing({ price: "", originalPrice: "", discountPercent: 0 });
-      setActiveTab("products");
-    },
-    [editItem, pricing, previewImage, addProduct, updateProduct],
-  );
+    const data = {
+      title: formData.get("title"),
+      brand: formData.get("brand"),
+      category: formData.get("category"),
+      description: formData.get("description"),
+      stock: Number(formData.get("stock")),
+      price: Number(pricing.price),
+      originalPrice: Number(pricing.originalPrice),
+      discountPercent: pricing.discountPercent, // Save calculated discount
+      image: previewImage,
+      sellerId: user?.email, // Tag ownership
+      updatedAt: new Date().toISOString(),
+    };
 
-  const handleEditClick = useCallback((item) => {
+    if (editItem) {
+      updateProduct(editItem.id, data);
+    } else {
+      addProduct({ ...data, id: Date.now() });
+    }
+
+    // Reset and close tab
+    setEditItem(null);
+    setPreviewImage(null);
+    setPricing({ price: "", originalPrice: "", discountPercent: 0 });
+    setActiveTab("products");
+  };
+
+  // Helper to open "New Product" tab cleanly
+  const openAddTab = () => {
+    setEditItem(null);
+    setPreviewImage(null);
+    setPricing({ price: "", originalPrice: "", discountPercent: 0 });
+    setActiveTab("add");
+  };
+
+  // Helper to load "Edit Product" tab
+  const handleEditClick = (item) => {
     setEditItem(item);
     setPricing({
-      price: item.price,
-      originalPrice: item.originalPrice || item.price,
-      discountPercent: item.discountPercent,
+      price: item.price.toString(),
+      originalPrice: item.originalPrice?.toString() || "",
+      discountPercent: item.discountPercent || 0,
     });
     setPreviewImage(item.image);
     setActiveTab("add");
-  }, []);
+  };
 
-  // --- 2. RENDER LOGIC ---
-
-  // If user is null, return nothing while the useEffect handles the navigate
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
-      {/* SIDEBAR NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white/80 backdrop-blur-md border-t border-slate-200 flex flex-row items-center justify-around md:sticky md:top-0 md:h-screen md:w-20 md:flex-col md:border-t-0 md:border-r md:justify-start md:pt-12 md:gap-5">
-        <div className="hidden md:flex mb-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600">
-          <Settings2 size={20} strokeWidth={2.5} />
-        </div>
-
+      {/* --- SIDEBAR --- */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white border-t md:sticky md:top-0 md:h-screen md:w-24 md:flex-col md:border-r flex items-center justify-around md:justify-start md:pt-12 md:gap-5">
         <NavButton
           active={activeTab === "products"}
           onClick={() => setActiveTab("products")}
@@ -183,89 +186,90 @@ const SellerDashboard = () => {
         />
         <NavButton
           active={activeTab === "add"}
-          onClick={() => {
-            setEditItem(null);
-            setPreviewImage(null);
-            setActiveTab("add");
-          }}
+          onClick={openAddTab}
           icon={<PlusCircle />}
           label="New"
         />
-
-        <div className="hidden md:flex mt-auto mb-6 flex-col items-center gap-4 w-full">
-          <button
-            onClick={handleLogout}
-            className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"
-            title="Logout"
-          >
-            <LogOut size={20} />
-          </button>
-          <button
-            onClick={resetData}
-            className="text-[10px] font-black text-slate-300 hover:text-indigo-500 uppercase tracking-tighter"
-          >
-            Reset
-          </button>
-        </div>
+        <button
+          onClick={logout}
+          className="hidden md:flex mt-auto mb-10 text-slate-400 hover:text-rose-500 transition-colors"
+          title="Logout"
+        >
+          <LogOut size={24} />
+        </button>
       </nav>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 sm:p-8 lg:p-12 pb-28 md:pb-12 overflow-y-auto w-full max-w-6xl mx-auto">
+      {/* --- MAIN CONTENT --- */}
+      <main className="flex-1 p-6 md:p-12 max-w-6xl mx-auto w-full mb-20 md:mb-0">
         <header className="mb-8 flex justify-between items-end">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight">
-              Hello, {user?.name?.split(" ")[0]}
+            <div className="flex items-center gap-2 mb-1">
+              {user.role === "admin" ? (
+                <>
+                  <ShieldCheck className="text-rose-500" size={18} />
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">
+                    Global Admin Access
+                  </p>
+                </>
+              ) : (
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Merchant Dashboard
+                </p>
+              )}
+            </div>
+            <h2 className="text-2xl font-black">
+              {user.role === "admin"
+                ? "Platform Control"
+                : `Welcome, ${user.name}`}
             </h2>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Store Management
-            </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="md:hidden flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-wider bg-rose-50 px-3 py-2 rounded-lg"
-          >
-            <LogOut size={14} /> Logout
-          </button>
         </header>
 
-        {activeTab !== "add" && activeTab !== "dashboard" && (
-          <div className="mb-8 relative max-w-md">
+        {/* SEARCH BAR (Only show on Products tab) */}
+        {activeTab === "products" && (
+          <div className="mb-8 relative max-w-md animate-in fade-in slide-in-from-left-4">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
               size={18}
             />
             <input
               type="text"
-              placeholder="Search inventory..."
+              placeholder="Search Listings..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white rounded-3xl border border-slate-200 shadow-sm focus:ring-2 ring-indigo-500 outline-none font-bold text-sm"
+              className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl border-none shadow-sm outline-none focus:ring-2 ring-indigo-500 font-bold transition-all"
             />
           </div>
         )}
 
         <div className="transition-all duration-300">
+          {/* TAB 1: DASHBOARD ANALYTICS */}
           {activeTab === "dashboard" && (
             <DashboardViewGraph
-              products={products}
+              products={myVisibleProducts}
               categories={categories}
               analytics={analytics}
             />
           )}
+
+          {/* TAB 2: PRODUCT LIST */}
           {activeTab === "products" && (
             <SellerDashboardProduct
               products={filteredProducts}
-              setActiveTab={setActiveTab}
               deleteProduct={deleteProduct}
               setEditItem={handleEditClick}
+              setActiveTab={setActiveTab}
             />
           )}
+
+          {/* TAB 3: ADD/EDIT FORM */}
           {activeTab === "add" && (
             <SellerDashboardAddProduct
               editItem={editItem}
+              setEditItem={setEditItem}
               previewImage={previewImage}
               pricing={pricing}
-              handlePriceChange={handlePriceChange}
+              handlePriceChange={handlePriceChange} // Logic passed here
               handleImageChange={handleImageChange}
               handleFormSubmit={handleFormSubmit}
               categories={categories}
@@ -278,18 +282,21 @@ const SellerDashboard = () => {
   );
 };
 
-const NavButton = React.memo(({ active, icon, onClick, label }) => (
+// Helper Component for Sidebar
+const NavButton = ({ active, icon, onClick, label }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-4 rounded-3xl transition-all duration-300 group ${active ? "bg-indigo-600 text-white shadow-xl scale-110" : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50"}`}
+    className={`flex flex-col items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-3xl transition-all ${
+      active
+        ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-105"
+        : "text-slate-400 hover:bg-indigo-50 hover:text-indigo-600"
+    }`}
   >
-    {React.cloneElement(icon, { size: 26, strokeWidth: active ? 2.5 : 2 })}
-    <span
-      className={`text-[9px] font-black uppercase mt-1.5 md:hidden ${active ? "opacity-100" : "opacity-60"}`}
-    >
+    {React.cloneElement(icon, { size: 24, strokeWidth: active ? 2.5 : 2 })}
+    <span className="text-[8px] font-black uppercase mt-1.5 tracking-tighter">
       {label}
     </span>
   </button>
-));
+);
 
 export default SellerDashboard;

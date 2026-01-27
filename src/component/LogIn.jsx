@@ -97,7 +97,7 @@ const LogIn = ({ onClose }) => {
         <X size={20} />
       </button>
 
-      <div className="mb-6 text-center">
+      <div className="mb-2 text-center">
         <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight italic">
           {isSignUp ? "Create Account" : "Welcome Back"}
         </h1>
@@ -168,7 +168,7 @@ const LogIn = ({ onClose }) => {
 
         {/* Profile & Shipping Info (Only shown during Sign Up) */}
         {isSignUp && (
-          <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className=" grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
                 First Name
@@ -178,7 +178,7 @@ const LogIn = ({ onClose }) => {
                 required
                 value={formData.firstName}
                 onChange={handleInputChange}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:border-indigo-500 outline-none"
+                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm font-bold focus:border-indigo-500 outline-none"
                 placeholder="Alex"
               />
             </div>
@@ -191,7 +191,7 @@ const LogIn = ({ onClose }) => {
                 required
                 value={formData.lastName}
                 onChange={handleInputChange}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:border-indigo-500 outline-none"
+                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm font-bold focus:border-indigo-500 outline-none"
                 placeholder="Doe"
               />
             </div>
@@ -209,7 +209,7 @@ const LogIn = ({ onClose }) => {
                   required
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-11 pr-4 py-3 text-sm font-bold focus:border-indigo-500 outline-none"
+                  className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-11 pr-4 py-2 text-sm font-bold focus:border-indigo-500 outline-none"
                   placeholder="123 Street Name"
                 />
               </div>
@@ -223,7 +223,7 @@ const LogIn = ({ onClose }) => {
                 required
                 value={formData.city}
                 onChange={handleInputChange}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:border-indigo-500 outline-none"
+                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm font-bold focus:border-indigo-500 outline-none"
                 placeholder="New York"
               />
             </div>
@@ -236,7 +236,7 @@ const LogIn = ({ onClose }) => {
                 required
                 value={formData.zipCode}
                 onChange={handleInputChange}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:border-indigo-500 outline-none"
+                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm font-bold focus:border-indigo-500 outline-none"
                 placeholder="10001"
               />
             </div>
@@ -251,7 +251,7 @@ const LogIn = ({ onClose }) => {
         </button>
       </form>
 
-      <div className="mt-8 text-center border-t border-gray-50 pt-6">
+      <div className="mt-1 text-center border-t border-gray-50 pt-2">
         <button
           onClick={() => setIsSignUp(!isSignUp)}
           className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors"
