@@ -66,9 +66,10 @@ const SellerDashboardAddProduct = ({
               value={pricing.originalPrice}
               onChange={handlePriceChange}
             />
-            {pricing.discountPercent > 0 && (
-              <span className="absolute -top-4 right-0 bg-green-500 text-white text-[9px] font-black px-2 py-1 rounded-lg flex items-center gap-1 animate-bounce">
-                <Tag size={8} /> {pricing.discountPercent}% OFF
+            {/* Improved Badge Logic */}
+            {pricing.discountPercent > 0 && pricing.discountPercent < 100 && (
+              <span className="absolute -top-3 right-0 bg-emerald-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse shadow-lg shadow-emerald-200 flex items-center gap-1">
+                <Tag size={10} /> {pricing.discountPercent}% OFF
               </span>
             )}
           </div>
@@ -89,7 +90,7 @@ const SellerDashboardAddProduct = ({
             <select
               name="category"
               defaultValue={editItem?.category}
-              className="p-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 ring-indigo-500 appearance-none border-none"
+              className="p-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 ring-indigo-500 appearance-none border-none cursor-pointer"
             >
               {categories.map((c) => (
                 <option key={c} value={c}>
@@ -155,7 +156,7 @@ const SellerDashboardAddProduct = ({
           <button
             type="button"
             onClick={() => {
-              setEditItem(null);
+              if (setEditItem) setEditItem(null);
               setActiveTab("products");
             }}
             className="flex-1 font-bold text-slate-400 hover:text-rose-500 transition-colors"

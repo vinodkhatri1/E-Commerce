@@ -1,9 +1,11 @@
 import { createContext, useContext, useState } from "react";
 import ProductData from "../Data/ProductData";
+import { useAuth } from "./AuthContext";
 
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
+  const { user } = useAuth();
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem("seller_inventory");
     return saved ? JSON.parse(saved) : ProductData;
@@ -11,41 +13,46 @@ export const ProductProvider = ({ children }) => {
 
   const categories = [...new Set(ProductData.map((p) => p.category))];
 
-  const deleteProduct = (id) => {
-    if (window.confirm("Are you sure you want to delete this?")) {
-      const updated = products.filter((p) => p.id !== id);
-      localStorage.setItem("seller_inventory", JSON.stringify(updated));
-      window.location.reload();
-    }
+  const saveInventory = (newProducts) => {
+    setProducts(newProducts);
+    localStorage.setItem("seller_inventory", JSON.stringify(newProducts));
   };
 
   const addProduct = (data) => {
-    const updated = [{ ...data, id: Date.now() }, ...products];
-    localStorage.setItem("seller_inventory", JSON.stringify(updated));
-    window.location.reload();
+    // Ensure we have a fallback if user email isn't immediately available
+    const currentUEmail = data.sellerId || user?.email;
+
+    const newProduct = {
+      ...data,
+      id: Date.now(),
+      sellerId: currentUEmail,
+      sellerName: user?.name || "Seller",
+    };
+
+    const updatedProducts = [newProduct, ...products];
+    setProducts(updatedProducts);
+    localStorage.setItem("seller_inventory", JSON.stringify(updatedProducts));
+  };
+
+  const deleteProduct = (id) => {
+    const product = products.find((p) => p.id === id);
+    // PERMISSION CHECK
+    if (user?.role === "admin" || product?.sellerId === user?.email) {
+      if (window.confirm("Delete this listing?")) {
+        saveInventory(products.filter((p) => p.id !== id));
+      }
+    } else {
+      alert("Permission Denied: You don't own this product.");
+    }
   };
 
   const updateProduct = (id, data) => {
-    const updated = products.map((p) => (p.id === id ? { ...p, ...data } : p));
-    localStorage.setItem("seller_inventory", JSON.stringify(updated));
-    window.location.reload();
-  };
-
-  const resetData = () => {
-    localStorage.removeItem("seller_inventory");
-    window.location.reload();
+    saveInventory(products.map((p) => (p.id === id ? { ...p, ...data } : p)));
   };
 
   return (
     <ProductContext.Provider
-      value={{
-        products,
-        categories,
-        deleteProduct,
-        addProduct,
-        updateProduct,
-        resetData,
-      }}
+      value={{ products, addProduct, updateProduct, deleteProduct, categories }}
     >
       {children}
     </ProductContext.Provider>
