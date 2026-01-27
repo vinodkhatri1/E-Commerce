@@ -30,6 +30,19 @@ const Checkout = () => {
     expiry: "",
     cvc: "",
   });
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email || prev.email,
+        firstName: user.firstName || prev.firstName,
+        lastName: user.lastName || prev.lastName,
+        address: user.address || prev.address,
+        city: user.city || prev.city,
+        zipCode: user.zipCode || prev.zipCode,
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user?.email) {

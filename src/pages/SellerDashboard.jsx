@@ -171,31 +171,36 @@ const SellerDashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
       {/* --- SIDEBAR --- */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white border-t md:sticky md:top-0 md:h-screen md:w-24 md:flex-col md:border-r flex items-center justify-around md:justify-start md:pt-12 md:gap-5">
-        <NavButton
-          active={activeTab === "products"}
-          onClick={() => setActiveTab("products")}
-          icon={<Package />}
-          label="Items"
-        />
-        <NavButton
-          active={activeTab === "dashboard"}
-          onClick={() => setActiveTab("dashboard")}
-          icon={<LayoutDashboard />}
-          label="Stats"
-        />
-        <NavButton
-          active={activeTab === "add"}
-          onClick={openAddTab}
-          icon={<PlusCircle />}
-          label="New"
-        />
+      <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white/80 backdrop-blur-lg border-t border-slate-100 md:fixed md:top-35 md:h-screen md:w-24 md:flex-col md:border-t-0 md:border-r md:pt-12 md:pb-10 flex items-center justify-around md:justify-start md:gap-8">
+        {/* Navigation Items */}
+        <div className="flex md:flex-col items-center justify-around w-full md:gap-6">
+          <NavButton
+            active={activeTab === "products"}
+            onClick={() => setActiveTab("products")}
+            icon={<Package />}
+            label="Items"
+          />
+          <NavButton
+            active={activeTab === "dashboard"}
+            onClick={() => setActiveTab("dashboard")}
+            icon={<LayoutDashboard />}
+            label="Stats"
+          />
+          <NavButton
+            active={activeTab === "add"}
+            onClick={openAddTab}
+            icon={<PlusCircle />}
+            label="New"
+          />
+        </div>
+
+        {/* Desktop Logout - Styled to match */}
         <button
           onClick={logout}
-          className="hidden md:flex mt-auto mb-10 text-slate-400 hover:text-rose-500 transition-colors"
+          className="hidden md:flex mt-auto group p-4 rounded-3xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90"
           title="Logout"
         >
-          <LogOut size={24} />
+          <LogOut size={22} strokeWidth={2.5} />
         </button>
       </nav>
 
@@ -265,6 +270,7 @@ const SellerDashboard = () => {
           {/* TAB 3: ADD/EDIT FORM */}
           {activeTab === "add" && (
             <SellerDashboardAddProduct
+              user={user}
               editItem={editItem}
               setEditItem={setEditItem}
               previewImage={previewImage}
