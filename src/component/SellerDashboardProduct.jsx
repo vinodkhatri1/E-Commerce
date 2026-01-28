@@ -25,16 +25,25 @@ const SellerDashboardProduct = ({
                 key={product.id}
                 className="hover:bg-slate-50 transition group"
               >
-                <td className="p-4 w-20">
-                  <img
-                    src={
-                      product.image?.startsWith("data:")
-                        ? product.image
-                        : `/image/${product.category}/${product.image}`
-                    }
-                    className="w-12 h-12 rounded-xl object-cover bg-slate-100"
-                    onError={(e) => (e.target.src = "https://placehold.co/100")}
-                  />
+                <td className="p-4">
+                  <div className="w-15 h-12 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                    <img
+                      width="60"
+                      height="48"
+                      src={
+                        product.image?.startsWith("data:")
+                          ? product.image
+                          : `/image/${product.category}/${product.image}`
+                      }
+                      alt={product.name || "Product image"}
+                      className="w-full h-full object-cover transition-opacity duration-300"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://placehold.co/100";
+                      }}
+                    />
+                  </div>
                 </td>
 
                 <td className="p-4">

@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useProducts } from "../context/productContext";
 import { useAuth } from "../context/AuthContext";
 
-// Icons
+// ✅ OPTIMIZED IMPORTS
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import Package from "lucide-react/dist/esm/icons/package";
 import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
 import Search from "lucide-react/dist/esm/icons/search";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw"; // New Icon
 
-// Components
-import DashboardViewGraph from "../component/DashboardViewGraph"; // Assuming you have this or generic placeholder
+import DashboardViewGraph from "../component/DashboardViewGraph";
 import SellerDashboardProduct from "../component/SellerDashboardProduct";
 import SellerDashboardAddProduct from "../component/SellerDashboardAddProduct";
 
@@ -22,23 +22,19 @@ const SellerDashboard = () => {
   const { products, addProduct, updateProduct, deleteProduct, categories } =
     useProducts();
 
-  // --- STATE MANAGEMENT ---
   const [activeTab, setActiveTab] = useState("products");
   const [editItem, setEditItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Pricing state for the Add/Edit Form
   const [pricing, setPricing] = useState({
     price: "",
     originalPrice: "",
     discountPercent: 0,
   });
 
-  // --- 1. AUTH PROTECTION ---
   useEffect(() => {
-    // If no user, or user is not seller/admin, redirect home
     if (!user || (user.role !== "seller" && user.role !== "admin")) {
       navigate("/", { replace: true });
     }
@@ -46,15 +42,12 @@ const SellerDashboard = () => {
 
   const myVisibleProducts = useMemo(() => {
     if (!user || !user.email) return [];
-
     if (user.role === "admin") return products;
-
     return products.filter((p) => {
       return p.sellerId === user.email;
     });
   }, [products, user]);
 
-  // --- 3. SEARCH FILTERING ---
   const filteredProducts = useMemo(() => {
     const query = deferredSearchQuery.toLowerCase();
     return myVisibleProducts.filter(
@@ -64,7 +57,6 @@ const SellerDashboard = () => {
     );
   }, [myVisibleProducts, deferredSearchQuery]);
 
-  // --- 4. ANALYTICS CALCULATION ---
   const analytics = useMemo(() => {
     const totalVal = myVisibleProducts.reduce(
       (sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock) || 0),
@@ -81,30 +73,23 @@ const SellerDashboard = () => {
     };
   }, [myVisibleProducts]);
 
-  // --- 5. PRICE & DISCOUNT CALCULATION ---
   const handlePriceChange = (e) => {
     const { name, value } = e.target;
-
     setPricing((prev) => {
       const updated = { ...prev, [name]: value };
-
-      // Convert to numbers for math
       const salePrice = parseFloat(updated.price) || 0;
       const regPrice = parseFloat(updated.originalPrice) || 0;
 
-      // Auto-calculate discount percentage
       if (regPrice > salePrice && salePrice > 0) {
         const percentage = ((regPrice - salePrice) / regPrice) * 100;
         updated.discountPercent = Math.round(percentage);
       } else {
         updated.discountPercent = 0;
       }
-
       return updated;
     });
   };
 
-  // --- 6. IMAGE HANDLER ---
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -114,7 +99,6 @@ const SellerDashboard = () => {
     }
   };
 
-  // --- 7. FORM SUBMISSION ---
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -127,9 +111,9 @@ const SellerDashboard = () => {
       stock: Number(formData.get("stock")),
       price: Number(pricing.price),
       originalPrice: Number(pricing.originalPrice),
-      discountPercent: pricing.discountPercent, // Save calculated discount
+      discountPercent: pricing.discountPercent,
       image: previewImage,
-      sellerId: user?.email, // Tag ownership
+      sellerId: user?.email,
       updatedAt: new Date().toISOString(),
     };
 
@@ -139,14 +123,12 @@ const SellerDashboard = () => {
       addProduct({ ...data, id: Date.now() });
     }
 
-    // Reset and close tab
     setEditItem(null);
     setPreviewImage(null);
     setPricing({ price: "", originalPrice: "", discountPercent: 0 });
     setActiveTab("products");
   };
 
-  // Helper to open "New Product" tab cleanly
   const openAddTab = () => {
     setEditItem(null);
     setPreviewImage(null);
@@ -154,7 +136,6 @@ const SellerDashboard = () => {
     setActiveTab("add");
   };
 
-  // Helper to load "Edit Product" tab
   const handleEditClick = (item) => {
     setEditItem(item);
     setPricing({
@@ -166,13 +147,17 @@ const SellerDashboard = () => {
     setActiveTab("add");
   };
 
+  // ✅ New Reload Function
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
-      {/* --- SIDEBAR --- */}
+      {/* Navigation Sidebar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white/80 backdrop-blur-lg border-t border-slate-100 md:fixed md:top-35 md:h-screen md:w-24 md:flex-col md:border-t-0 md:border-r md:pt-12 md:pb-10 flex items-center justify-around md:justify-start md:gap-8">
-        {/* Navigation Items */}
         <div className="flex md:flex-col items-center justify-around w-full md:gap-6">
           <NavButton
             active={activeTab === "products"}
@@ -194,7 +179,6 @@ const SellerDashboard = () => {
           />
         </div>
 
-        {/* Desktop Logout - Styled to match */}
         <button
           onClick={logout}
           className="hidden md:flex mt-auto group p-4 rounded-3xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90"
@@ -204,7 +188,7 @@ const SellerDashboard = () => {
         </button>
       </nav>
 
-      {/* --- MAIN CONTENT --- */}
+      {/* Main Content */}
       <main className="flex-1 p-6 md:p-12 max-w-6xl mx-auto w-full mb-20 md:mb-0">
         <header className="mb-8 flex justify-between items-end">
           <div>
@@ -228,9 +212,24 @@ const SellerDashboard = () => {
                 : `Welcome, ${user.name}`}
             </h2>
           </div>
+
+          {/* ✅ REFRESH BUTTON ADDED HERE */}
+          <button
+            onClick={handleReload}
+            className="group flex items-center gap-2 px-4 py-3 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:shadow-md transition-all active:scale-95"
+            title="Reload System"
+          >
+            <RefreshCw
+              size={18}
+              className="transition-transform duration-500 group-hover:rotate-180"
+            />
+            <span className="hidden sm:block font-bold text-xs uppercase tracking-wider">
+              Reload
+            </span>
+          </button>
         </header>
 
-        {/* SEARCH BAR (Only show on Products tab) */}
+        {/* Dynamic Content */}
         {activeTab === "products" && (
           <div className="mb-8 relative max-w-md animate-in fade-in slide-in-from-left-4">
             <Search
@@ -248,7 +247,6 @@ const SellerDashboard = () => {
         )}
 
         <div className="transition-all duration-300">
-          {/* TAB 1: DASHBOARD ANALYTICS */}
           {activeTab === "dashboard" && (
             <DashboardViewGraph
               products={myVisibleProducts}
@@ -257,7 +255,6 @@ const SellerDashboard = () => {
             />
           )}
 
-          {/* TAB 2: PRODUCT LIST */}
           {activeTab === "products" && (
             <SellerDashboardProduct
               products={filteredProducts}
@@ -267,7 +264,6 @@ const SellerDashboard = () => {
             />
           )}
 
-          {/* TAB 3: ADD/EDIT FORM */}
           {activeTab === "add" && (
             <SellerDashboardAddProduct
               user={user}
@@ -275,7 +271,7 @@ const SellerDashboard = () => {
               setEditItem={setEditItem}
               previewImage={previewImage}
               pricing={pricing}
-              handlePriceChange={handlePriceChange} // Logic passed here
+              handlePriceChange={handlePriceChange}
               handleImageChange={handleImageChange}
               handleFormSubmit={handleFormSubmit}
               categories={categories}
@@ -288,7 +284,6 @@ const SellerDashboard = () => {
   );
 };
 
-// Helper Component for Sidebar
 const NavButton = ({ active, icon, onClick, label }) => (
   <button
     onClick={onClick}
