@@ -3,21 +3,24 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Minus from "lucide-react/dist/esm/icons/minus";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Save from "lucide-react/dist/esm/icons/save";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Package from "lucide-react/dist/esm/icons/package";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+// Icons
+import {
+  Clock,
+  Trash2,
+  ArrowRight,
+  Plus,
+  Minus,
+  CheckCircle,
+  MapPin,
+  Save,
+  Loader2,
+  AlertTriangle,
+  LogOut,
+  Package,
+  ChevronRight,
+  LayoutDashboard,
+  ShieldCheck,
+} from "lucide-react";
 
 const UserProfile = () => {
   const { user, logout, login } = useAuth();
@@ -39,35 +42,42 @@ const UserProfile = () => {
   });
   useEffect(() => {
     if (user) {
+      // 1. Check for previously saved profile updates (specific to this page)
       const savedAddress = localStorage.getItem(`address_${user.email}`);
+      // 2. Load order count
       const savedOrders = localStorage.getItem(`orders_${user.email}`);
       if (savedOrders) setOrderCount(JSON.parse(savedOrders).length);
 
       if (savedAddress) {
+        // Use specifically updated profile data if it exists
         setAddressInfo(JSON.parse(savedAddress));
       } else {
+        // AUTO-INPUT: Use the data provided during Registration/Login
         setAddressInfo({
           email: user.email || "",
           firstName: user.firstName || "",
           lastName: user.lastName || "",
           address: user.address || "",
           city: user.city || "",
-          zip: user.zipCode || "",
+          zip: user.zipCode || "", // Note: mapped from zipCode to zip for your state
         });
       }
     }
   }, [user]);
 
+  // --- ROLE LOGIC (Saves to both Active Session and Permanent Storage) ---
   const toggleSellerRole = () => {
     const newRole = user?.role === "seller" ? "buyer" : "seller";
     const updatedUser = { ...user, role: newRole };
 
+    // 1. Update Permanent "Database"
     const users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
     const updatedUsers = users.map((u) =>
       u.email === user.email ? { ...u, role: newRole } : u,
     );
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
 
+    // 2. Update Context & Active User Session
     login(updatedUser);
 
     if (newRole === "seller") {
@@ -78,12 +88,14 @@ const UserProfile = () => {
   const handleDeleteAccount = () => {
     if (!user?.email) return;
 
+    // Sync with the key used in LogIn.jsx
     const allUsers = JSON.parse(
       localStorage.getItem("registeredUsers") || "[]",
     );
     const updatedUsers = allUsers.filter((u) => u.email !== user.email);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
 
+    // Clean up personal data
     localStorage.removeItem(`orders_${user.email}`);
     localStorage.removeItem(`address_${user.email}`);
 
@@ -103,11 +115,13 @@ const UserProfile = () => {
     setIsSaving(true);
 
     setTimeout(() => {
+      // 1. Save to specific address key (for Checkout logic)
       localStorage.setItem(
         `address_${user.email}`,
         JSON.stringify(addressInfo),
       );
 
+      // 2. Sync with the main user object in AuthContext
       const updatedUser = {
         ...user,
         firstName: addressInfo.firstName,
@@ -120,8 +134,10 @@ const UserProfile = () => {
           user.name,
       };
 
+      // Update the active session via login (this updates AuthContext)
       login(updatedUser);
 
+      // 3. Update the "Database" (registeredUsers)
       const users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
       const updatedUsers = users.map((u) =>
         u.email === user.email ? { ...u, ...updatedUser } : u,
@@ -160,6 +176,7 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* ASIDE: IDENTITY & CONTROLS */}
         <aside className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 text-center">
             <div className="relative inline-block mb-4">
@@ -279,6 +296,7 @@ const UserProfile = () => {
           </div>
         </aside>
 
+        {/* MAIN: SHIPPING & CART */}
         <main className="lg:col-span-8 space-y-6">
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200">
             <div className="flex justify-between items-start mb-8">
@@ -308,14 +326,12 @@ const UserProfile = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="md:col-span-2">
-                <ProfileInput
-                  label="Email"
-                  name="email"
-                  value={addressInfo.email}
-                  onChange={handleAddressChange}
-                />
-              </div>
+              <ProfileInput
+                label="Email"
+                name="email"
+                value={addressInfo.email}
+                onChange={handleAddressChange}
+              />
               <ProfileInput
                 label="First Name"
                 name="firstName"
