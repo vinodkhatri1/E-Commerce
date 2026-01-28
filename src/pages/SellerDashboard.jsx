@@ -3,14 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useProducts } from "../context/productContext";
 import { useAuth } from "../context/AuthContext";
 
-// ✅ OPTIMIZED IMPORTS
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import Package from "lucide-react/dist/esm/icons/package";
 import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
 import Search from "lucide-react/dist/esm/icons/search";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw"; // New Icon
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 
 import DashboardViewGraph from "../component/DashboardViewGraph";
 import SellerDashboardProduct from "../component/SellerDashboardProduct";
@@ -147,7 +146,6 @@ const SellerDashboard = () => {
     setActiveTab("add");
   };
 
-  // ✅ New Reload Function
   const handleReload = () => {
     window.location.reload();
   };
@@ -156,7 +154,6 @@ const SellerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
-      {/* Navigation Sidebar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white/80 backdrop-blur-lg border-t border-slate-100 md:fixed md:top-35 md:h-screen md:w-24 md:flex-col md:border-t-0 md:border-r md:pt-12 md:pb-10 flex items-center justify-around md:justify-start md:gap-8">
         <div className="flex md:flex-col items-center justify-around w-full md:gap-6">
           <NavButton
@@ -188,7 +185,6 @@ const SellerDashboard = () => {
         </button>
       </nav>
 
-      {/* Main Content */}
       <main className="flex-1 p-6 md:p-12 max-w-6xl mx-auto w-full mb-20 md:mb-0">
         <header className="mb-8 flex justify-between items-end">
           <div>
@@ -213,7 +209,6 @@ const SellerDashboard = () => {
             </h2>
           </div>
 
-          {/* ✅ REFRESH BUTTON ADDED HERE */}
           <button
             onClick={handleReload}
             className="group flex items-center gap-2 px-4 py-3 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:shadow-md transition-all active:scale-95"
@@ -229,7 +224,6 @@ const SellerDashboard = () => {
           </button>
         </header>
 
-        {/* Dynamic Content */}
         {activeTab === "products" && (
           <div className="mb-8 relative max-w-md animate-in fade-in slide-in-from-left-4">
             <Search
