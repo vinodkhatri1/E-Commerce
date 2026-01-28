@@ -13,7 +13,6 @@ const ProductCard = ({ productdt }) => {
 
   return (
     <div className="w-full h-full bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group">
-      {/* Image Area */}
       <div className="h-64 p-4 border-b border-gray-100 flex items-center justify-center bg-gray-50 relative overflow-hidden">
         <Link
           to={`/products/${productdt.id}`}
@@ -36,7 +35,6 @@ const ProductCard = ({ productdt }) => {
         )}
       </div>
 
-      {/* Content Area */}
       <div className="p-4 flex flex-col flex-1">
         <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
           {productdt.category}
@@ -48,13 +46,11 @@ const ProductCard = ({ productdt }) => {
           </h2>
         </Link>
 
-        {/* Rating */}
         <div className="flex items-center gap-2 mb-3">
           <Stars rating={productdt.rating} />
           <span className="text-xs text-gray-500">({productdt.rating})</span>
         </div>
 
-        {/* Price & Action */}
         <div className="mt-auto flex justify-between items-end">
           <div>
             <p className="text-lg font-bold text-blue-600">
@@ -67,7 +63,6 @@ const ProductCard = ({ productdt }) => {
             )}
           </div>
           <div className="flex gap-2">
-            {/* Wishlist Button Updated */}
             <button
               className={`p-2 rounded-lg transition-colors ${
                 activeWishlist

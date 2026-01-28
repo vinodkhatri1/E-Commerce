@@ -23,7 +23,7 @@ const Wishlist = () => {
           Save items you love to find them easily later.
         </p>
         <Link
-          to="/shop"
+          to="/products"
           className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
         >
           Continue Shopping <ArrowRight size={18} />
@@ -36,7 +36,7 @@ const Wishlist = () => {
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="mb-10">
         <Link
-          to="/shop"
+          to="/products"
           className="text-sm text-gray-500 hover:text-blue-600 flex items-center gap-1 mb-4"
         >
           <ChevronLeft size={16} /> Back to Shop
@@ -55,7 +55,6 @@ const Wishlist = () => {
             key={product.id}
             className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
           >
-            {/* Image Section */}
             <div className="relative aspect-square bg-gray-50 p-6 flex items-center justify-center">
               <img
                 src={
@@ -74,7 +73,6 @@ const Wishlist = () => {
               </button>
             </div>
 
-            {/* Info Section */}
             <div className="p-5">
               <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">
                 {product.category}
