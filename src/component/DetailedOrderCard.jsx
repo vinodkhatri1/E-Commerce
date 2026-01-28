@@ -75,11 +75,7 @@ const DetailedOrderCard = ({ order }) => {
               <div key={idx} className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-slate-50 rounded-lg p-1 border border-slate-100 shrink-0 flex items-center justify-center">
                   <img
-                    src={
-                      item.image?.startsWith("data:")
-                        ? item.image
-                        : `/image/${item.category}/${item.image}`
-                    }
+                    src={item.image}
                     className="w-full h-full object-contain mix-blend-multiply"
                     alt=""
                   />

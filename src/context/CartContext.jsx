@@ -1,20 +1,32 @@
 import { createContext, useContext, useEffect, useState } from "react";
+// Import the image map from your data file
+import { productImages } from "../Data/ProductData";
 
 const CartContext = createContext();
 const CART_KEY = "cart_items";
 const WISHLIST_KEY = "wishlist_items";
 
 export const CartProvider = ({ children }) => {
+  // Function to re-attach correct image paths to saved data
+  const rehydrateImages = (data) => {
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    return parsed.map((item) => ({
+      ...item,
+      // Re-assign the image variable based on the product title
+      image: productImages[item.title] || item.image,
+    }));
+  };
+
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem(CART_KEY);
-    return savedCart ? JSON.parse(savedCart) : [];
+    return savedCart ? rehydrateImages(savedCart) : [];
   });
 
   const [wishlist, setWishlist] = useState(() => {
     const savedWishlist = localStorage.getItem(WISHLIST_KEY);
-    return savedWishlist ? JSON.parse(savedWishlist) : [];
+    return savedWishlist ? rehydrateImages(savedWishlist) : [];
   });
-
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {

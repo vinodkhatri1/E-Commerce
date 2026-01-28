@@ -57,11 +57,7 @@ const Wishlist = () => {
           >
             <div className="relative aspect-square bg-gray-50 p-6 flex items-center justify-center">
               <img
-                src={
-                  product.image?.startsWith("data:")
-                    ? product.image
-                    : `/image/${product.category}/${product.image}`
-                }
+                src={product.image}
                 alt={product.title}
                 className="h-full w-auto object-contain group-hover:scale-110 transition-transform"
               />

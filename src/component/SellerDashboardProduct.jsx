@@ -26,15 +26,11 @@ const SellerDashboardProduct = ({
                 className="hover:bg-slate-50 transition group"
               >
                 <td className="p-4">
-                  <div className="w-15 h-12 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                  <div className="w-15 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0">
                     <img
                       width="60"
                       height="48"
-                      src={
-                        product.image?.startsWith("data:")
-                          ? product.image
-                          : `/image/${product.category}/${product.image}`
-                      }
+                      src={product.image}
                       alt={product.name || "Product image"}
                       className="w-full h-full object-cover transition-opacity duration-300"
                       loading="lazy"
@@ -91,11 +87,7 @@ const SellerDashboardProduct = ({
         {products.map((product) => (
           <div key={product.id} className="p-4 flex gap-4">
             <img
-              src={
-                product.image?.startsWith("data:")
-                  ? product.image
-                  : `/image/${product.category}/${product.image}`
-              }
+              src={product.image}
               className="w-14 h-14 rounded-xl object-cover bg-slate-100 shrink-0"
               onError={(e) => (e.target.src = "https://placehold.co/100")}
             />
