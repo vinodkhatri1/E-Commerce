@@ -114,16 +114,10 @@ const Header = () => {
       <div className="bg-gray-50 border-b border-gray-100 hidden lg:block font-sans">
         <div className="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center text-[11px] font-black text-gray-500 uppercase tracking-[0.15em]">
           <div className="flex items-center gap-6">
-            <a
-              href="tel:+146942***44"
-              className="hover:text-indigo-600 transition-colors flex items-center gap-2"
-            >
+            <a className="hover:text-indigo-600 transition-colors flex items-center gap-2">
               <Phone size={12} className="text-indigo-500" /> +1 (469) 42*-**44
             </a>
-            <a
-              href="mailto:info@store.com"
-              className="hover:text-indigo-600 transition-colors flex items-center gap-2"
-            >
+            <a className="hover:text-indigo-600 transition-colors flex items-center gap-2">
               <Mail size={12} className="text-indigo-500" /> info@store.com
             </a>
           </div>
@@ -350,10 +344,12 @@ const Header = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Search
-              size={18}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600"
+            >
+              <Search size={18} />
+            </button>
           </form>
         </div>
 

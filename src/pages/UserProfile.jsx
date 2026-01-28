@@ -3,23 +3,21 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
-import {
-  Clock,
-  Trash2,
-  ArrowRight,
-  Plus,
-  Minus,
-  CheckCircle,
-  MapPin,
-  Save,
-  Loader2,
-  AlertTriangle,
-  LogOut,
-  Package,
-  ChevronRight,
-  LayoutDashboard,
-  ShieldCheck,
-} from "lucide-react";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Minus from "lucide-react/dist/esm/icons/minus";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Save from "lucide-react/dist/esm/icons/save";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Package from "lucide-react/dist/esm/icons/package";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 
 const UserProfile = () => {
   const { user, logout, login } = useAuth();
@@ -310,12 +308,14 @@ const UserProfile = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <ProfileInput
-                label="Email"
-                name="email"
-                value={addressInfo.email}
-                onChange={handleAddressChange}
-              />
+              <div className="md:col-span-2">
+                <ProfileInput
+                  label="Email"
+                  name="email"
+                  value={addressInfo.email}
+                  onChange={handleAddressChange}
+                />
+              </div>
               <ProfileInput
                 label="First Name"
                 name="firstName"
