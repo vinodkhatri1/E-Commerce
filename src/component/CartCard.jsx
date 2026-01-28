@@ -11,11 +11,7 @@ const CartCard = ({ item }) => {
       <div className="h-20 w-20 shrink-0 bg-gray-50 rounded-md overflow-hidden p-1 flex items-center justify-center">
         <img
           className="h-full w-full object-contain"
-          src={
-            item.image?.startsWith("data:")
-              ? item.image
-              : `/image/${item.category}/${item.image}`
-          }
+          src={item.image}
           alt={item.title}
         />
       </div>

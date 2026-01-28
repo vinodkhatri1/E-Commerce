@@ -11,11 +11,7 @@ const OrderSummary = ({ cart, subtotal, shipping, total }) => (
         <div key={item.id} className="flex gap-4 items-center">
           <div className="w-14 h-14 bg-slate-50 rounded-xl p-2 border border-slate-100 shrink-0">
             <img
-              src={
-                item.image?.startsWith("data:")
-                  ? item.image
-                  : `/image/${item.category}/${item.image}`
-              }
+              src={item.image}
               className="w-full h-full object-contain"
               alt={item.title}
             />

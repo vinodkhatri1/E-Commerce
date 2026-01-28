@@ -370,11 +370,7 @@ const UserProfile = () => {
               >
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl p-2 shrink-0 flex items-center justify-center">
                   <img
-                    src={
-                      item.image?.startsWith("data:")
-                        ? item.image
-                        : `/image/${item.category}/${item.image}`
-                    }
+                    src={item.image}
                     className="h-full object-contain"
                     alt={item.title}
                   />

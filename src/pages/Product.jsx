@@ -32,11 +32,7 @@ const Product = () => {
 
   useEffect(() => {
     if (product) {
-      setImage(
-        product.image?.startsWith("data:")
-          ? product.image
-          : `/image/${product.category}/${product.image}`,
-      );
+      setImage(product.image);
       window.scrollTo(0, 0);
     }
   }, [id, product]);
@@ -48,11 +44,7 @@ const Product = () => {
       </div>
     );
 
-  const pic = [
-    product.image?.startsWith("data:")
-      ? product.image
-      : `/image/${product.category}/${product.image}`,
-  ];
+  const pic = [product.image];
 
   const similarProducts = ProductData.filter(
     (p) => p.category === product.category && p.id !== product.id,

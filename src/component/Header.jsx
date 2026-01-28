@@ -206,11 +206,7 @@ const Header = () => {
                     className="px-4 py-3 hover:bg-indigo-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 last:border-0"
                   >
                     <img
-                      src={
-                        p.image?.startsWith("data:")
-                          ? p.image
-                          : `/image/${p.category}/${p.image}`
-                      }
+                      src={p.image}
                       className="w-10 h-10 object-contain shrink-0"
                       alt=""
                       loading="lazy"

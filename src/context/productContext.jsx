@@ -1,20 +1,35 @@
 import { createContext, useContext, useState } from "react";
-import ProductData from "../Data/ProductData";
+import ProductData, { productImages } from "../Data/ProductData";
 import { useAuth } from "./AuthContext";
 
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
   const { user } = useAuth();
+
+  // Helper function to link image imports back to data
+  const rehydrateImages = (data) => {
+    if (!data) return [];
+    return data.map((product) => ({
+      ...product,
+      // Map the title to the imported asset.
+      // If no match (like a new seller upload), keep the original value.
+      image: productImages[product.title] || product.image,
+    }));
+  };
+
   const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem("seller_inventory");
-    return saved ? JSON.parse(saved) : ProductData;
+    const saved = localStorage.getItem("seller_inventory"); // Fixed: define 'saved' first
+    const initialData = saved ? JSON.parse(saved) : ProductData;
+    return rehydrateImages(initialData);
   });
 
   const categories = [...new Set(ProductData.map((p) => p.category))];
 
+  // Modified to ensure images are rehydrated whenever state updates
   const saveInventory = (newProducts) => {
-    setProducts(newProducts);
+    const rehydrated = rehydrateImages(newProducts);
+    setProducts(rehydrated);
     localStorage.setItem("seller_inventory", JSON.stringify(newProducts));
   };
 
@@ -29,9 +44,7 @@ export const ProductProvider = ({ children }) => {
       sellerName: user?.name || "Seller",
     };
 
-    const updatedProducts = [newProduct, ...products];
-    setProducts(updatedProducts);
-    localStorage.setItem("seller_inventory", JSON.stringify(updatedProducts));
+    saveInventory([newProduct, ...products]);
   };
 
   const deleteProduct = (id) => {
